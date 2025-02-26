@@ -322,8 +322,8 @@ const initCharts = () => {
     },
     yAxis: { 
       type: 'value',
-      min: value => Math.floor(value.min / 50) * 50,
-      max: value => Math.ceil(value.max / 50) * 50,
+      min: (value: { min: number }) => Math.floor(value.min / 50) * 50,
+      max: (value: { max: number }) => Math.ceil(value.max / 50) * 50,
       axisLabel: {
         formatter: (value: number) => `${value}万`
       }
