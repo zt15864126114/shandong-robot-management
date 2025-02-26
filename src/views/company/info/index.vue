@@ -10,16 +10,16 @@
 
       <el-descriptions :column="2" border>
         <el-descriptions-item label="企业名称">山东纳智达机器人有限公司</el-descriptions-item>
-        <el-descriptions-item label="法定代表人">王志远</el-descriptions-item>
-        <el-descriptions-item label="统一社会信用代码">91370100MA3XXXXXX8B</el-descriptions-item>
-        <el-descriptions-item label="注册资本">5000万元</el-descriptions-item>
+        <el-descriptions-item label="法定代表人">徐伟举</el-descriptions-item>
+        <el-descriptions-item label="统一社会信用代码">91370800MA94FCPE5E</el-descriptions-item>
+        <el-descriptions-item label="注册资本">2000万元</el-descriptions-item>
         <el-descriptions-item label="企业类型">股份有限公司</el-descriptions-item>
-        <el-descriptions-item label="成立日期">2018-06-15</el-descriptions-item>
+        <el-descriptions-item label="成立日期">2021-07-08</el-descriptions-item>
         <el-descriptions-item label="经营范围">
           工业机器人、服务机器人、特种机器人的研发、生产、销售及技术服务；智能装备及零部件的设计、制造、销售；自动化系统集成及技术咨询；软件开发；进出口业务
         </el-descriptions-item>
         <el-descriptions-item label="注册地址">
-          山东省济南市高新区新泺大街1768号科汇大厦B座12层
+          山东省济宁市汶上县中都街道华儒小镇25号楼
         </el-descriptions-item>
       </el-descriptions>
 
