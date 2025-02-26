@@ -84,8 +84,6 @@ import {
 import industrial1 from '@/assets/robot-images/industrial-1.png';
 import industrial2 from '@/assets/robot-images/industrial-2.png';
 import industrial3 from '@/assets/robot-images/industrial-3.png';
-import service1 from '@/assets/robot-images/service-1.jpg';
-import service2 from '@/assets/robot-images/service-2.jpg';
 
 const activeTab = ref('industrial');
 
@@ -127,7 +125,7 @@ const serviceRobots = [
     id: 1,
     name: 'NZ-AGV-100',
     description: '智能物流配送机器人，适用于医院、酒店等场景的智能配送服务',
-    image: service1,
+    image: 'https://example.com/placeholder.jpg',
     tag: '热销',
     features: ['自主导航', '避障功能', '语音交互', '远程控制']
   },
@@ -135,7 +133,7 @@ const serviceRobots = [
     id: 2,
     name: 'NZ-Clean-50',
     description: '商用清洁机器人，适用于大型商场、办公楼的自动化清洁',
-    image: '/robot-images/service-2.jpg',
+    image: 'https://example.com/placeholder.jpg',
     features: ['智能规划', '自动充电', '远程监控', '多场景适配']
   },
   {
