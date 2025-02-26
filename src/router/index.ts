@@ -195,6 +195,14 @@ const routes: RouteRecordRaw[] = [
             }
           }
         ]
+      },
+      {
+        path: 'products',
+        name: 'Products',
+        component: () => import('@/views/products/index.vue'),
+        meta: {
+          title: '产品服务'
+        }
       }
     ]
   }

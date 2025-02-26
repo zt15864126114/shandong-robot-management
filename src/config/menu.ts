@@ -5,7 +5,8 @@ import {
   User,
   DataLine,
   Monitor,
-  OfficeBuilding
+  OfficeBuilding,
+  Present
 } from '@element-plus/icons-vue';
 
 export const menuConfig = [
@@ -13,6 +14,11 @@ export const menuConfig = [
     title: '数据大屏',
     icon: Monitor,
     path: 'dashboard'
+  },
+  {
+    title: '产品服务',
+    icon: Present,
+    path: 'products'
   },
   {
     title: '订单管理',
