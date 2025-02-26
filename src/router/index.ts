@@ -6,8 +6,16 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: DefaultLayout,
-    redirect: '/dashboard',
+    redirect: '/welcome',
     children: [
+      {
+        path: 'welcome',
+        name: 'Welcome',
+        component: () => import('@/views/welcome/index.vue'),
+        meta: {
+          title: '欢迎'
+        }
+      },
       {
         path: 'dashboard',
         name: 'Dashboard',
