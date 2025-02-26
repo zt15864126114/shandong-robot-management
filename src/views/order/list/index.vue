@@ -168,7 +168,7 @@ const query = ref<OrderQuery>({
   pageSize: 10,
   keyword: '',
   type: '',
-  status: '',
+  status: undefined,
   dateRange: undefined
 });
 
@@ -188,7 +188,7 @@ const currentOrder = ref<Order>();
 // 生成测试数据
 const generateTestData = () => {
   const data: Order[] = [];
-  const statuses = ['unpaid', 'unshipped', 'shipped', 'completed', 'cancelled'];
+  const statuses: OrderStatus[] = ['unpaid', 'unshipped', 'shipped', 'completed', 'cancelled'];
   
   // 生成随机时间
   const getRandomDate = (start: Date, end: Date) => {
@@ -351,7 +351,7 @@ const resetQuery = () => {
     pageSize: 10,
     keyword: '',
     type: '',
-    status: '',
+    status: undefined,
     dateRange: undefined
   };
   loadOrderList();

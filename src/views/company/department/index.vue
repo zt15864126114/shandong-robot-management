@@ -130,7 +130,7 @@
 import { ref } from 'vue';
 import { Search } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import type { TreeNode } from 'element-plus/es/components/tree/src/tree.type';
+import type { TreeNodeData } from 'element-plus/es/components/tree/src/tree.type';
 
 interface Department {
   id: number;
@@ -152,6 +152,14 @@ interface Member {
   phone: string;
   email: string;
   joinTime: string;
+}
+
+interface DepartmentForm {
+  parentId: number | null;
+  name: string;
+  code: string;
+  manager: string;
+  description: string;
 }
 
 // 部门树数据
@@ -257,7 +265,7 @@ const currentDept = ref<Department>();
 const dialogVisible = ref(false);
 
 // 表单数据
-const form = ref({
+const form = ref<DepartmentForm>({
   parentId: null,
   name: '',
   code: '',
@@ -308,7 +316,7 @@ const handleEdit = (data: Department) => {
 };
 
 // 删除部门
-const handleDelete = (node: TreeNode, data: Department) => {
+const handleDelete = (node: TreeNodeData, data: Department) => {
   ElMessageBox.confirm(
     `确认删除部门"${data.name}"吗？`,
     '提示',

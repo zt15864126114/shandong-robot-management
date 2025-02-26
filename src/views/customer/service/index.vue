@@ -183,7 +183,7 @@
       title="工单详情"
       width="600px"
     >
-      <el-descriptions :column="2" border>
+      <el-descriptions v-if="currentRow" :column="2" border>
         <el-descriptions-item label="工单号">{{ currentRow.code }}</el-descriptions-item>
         <el-descriptions-item label="客户名称">{{ currentRow.customer }}</el-descriptions-item>
         <el-descriptions-item label="服务类型">{{ getTypeText(currentRow.type) }}</el-descriptions-item>
@@ -212,6 +212,19 @@ import { ref, reactive } from 'vue';
 import { Search } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import type { FormInstance, FormRules } from 'element-plus';
+
+interface ServiceTicket {
+  code: string;
+  customer: string;
+  type: string;
+  status: string;
+  title: string;
+  createTime: string;
+  processNotes?: {
+    time: string;
+    content: string;
+  }[];
+}
 
 // 查询参数
 const query = ref({
@@ -422,7 +435,7 @@ const dialogs = reactive({
 const formType = ref<'add' | 'process'>('add');
 
 // 当前行数据
-const currentRow = ref({});
+const currentRow = ref<ServiceTicket | null>(null);
 
 // 表单数据
 const form = reactive({
@@ -578,15 +591,17 @@ const handleSubmit = async () => {
         });
         ElMessage.success('工单创建成功');
       } else {
-        currentRow.value.status = 'processing';
-        if (!currentRow.value.processNotes) {
-          currentRow.value.processNotes = [];
+        if (currentRow.value) {
+          currentRow.value.status = 'processing';
+          if (!currentRow.value.processNotes) {
+            currentRow.value.processNotes = [];
+          }
+          currentRow.value.processNotes.push({
+            time: createTime,
+            content: form.processNote
+          });
         }
-        currentRow.value.processNotes.push({
-          time: createTime,
-          content: form.processNote
-        });
-        ElMessage.success('处理记录已更新');
+        ElMessage.success('处理成功');
       }
       dialogs.form = false;
     }

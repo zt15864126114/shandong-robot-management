@@ -1,7 +1,8 @@
 {
   "name": "shandong-robot-management",
-  "version": "1.0.0",
   "private": true,
+  "homepage": "https://zt15864126114.github.io/shandong-robot-management/",
+  "version": "0.0.1",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",

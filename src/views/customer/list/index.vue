@@ -134,7 +134,7 @@
       title="客户详情"
       width="600px"
     >
-      <el-descriptions :column="2" border>
+      <el-descriptions v-if="currentRow" :column="2" border>
         <el-descriptions-item label="客户名称">{{ currentRow.name }}</el-descriptions-item>
         <el-descriptions-item label="联系人">{{ currentRow.contact }}</el-descriptions-item>
         <el-descriptions-item label="联系电话">{{ currentRow.phone }}</el-descriptions-item>
@@ -154,6 +154,15 @@ import { ref, reactive } from 'vue';
 import { Search } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import type { FormInstance, FormRules } from 'element-plus';
+
+interface Customer {
+  name: string;
+  contact: string;
+  phone: string;
+  level: string;
+  address: string;
+  createTime: string;
+}
 
 // 查询参数
 const query = ref({
@@ -310,7 +319,7 @@ const dialogs = reactive({
 const formType = ref<'add' | 'edit'>('add');
 
 // 当前行数据
-const currentRow = ref({});
+const currentRow = ref<Customer | null>(null);
 
 // 表单数据
 const form = reactive({
@@ -417,8 +426,10 @@ const handleSubmit = async () => {
         });
         ElMessage.success('添加成功');
       } else {
-        Object.assign(currentRow.value, form);
-        ElMessage.success('修改成功');
+        if (currentRow.value) {
+          Object.assign(currentRow.value, form);
+          ElMessage.success('修改成功');
+        }
       }
       dialogs.form = false;
     }

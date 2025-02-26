@@ -157,12 +157,7 @@
         label-width="100px"
       >
         <el-form-item label="出库数量" prop="quantity">
-          <el-input-number 
-            v-model="outboundForm.quantity" 
-            :min="1" 
-            :max="currentRow.quantity"
-            style="width: 100%" 
-          />
+          <el-input-number v-if="currentRow" v-model="outboundForm.quantity" :min="1" :max="currentRow.quantity" style="width: 100%" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input
@@ -186,6 +181,17 @@ import { ref, reactive } from 'vue';
 import { Search } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import type { FormInstance, FormRules } from 'element-plus';
+
+interface InventoryItem {
+  id: number;
+  code: string;
+  name: string;
+  category: string;
+  quantity: number;
+  unit: string;
+  warning: number;
+  status: string;
+}
 
 // 查询参数
 const query = ref({
@@ -452,7 +458,7 @@ const dialogs = reactive({
 const formType = ref<'add' | 'edit'>('add');
 
 // 当前行数据
-const currentRow = ref({});
+const currentRow = ref<InventoryItem | null>(null);
 
 // 表单数据
 const form = reactive({
@@ -579,40 +585,46 @@ const handleSubmit = async () => {
         });
         ElMessage.success('添加成功');
       } else {
-        Object.assign(currentRow.value, form);
-        ElMessage.success('修改成功');
+        if (currentRow.value) {
+          Object.assign(currentRow.value, form);
+          ElMessage.success('修改成功');
+        }
       }
       dialogs.form = false;
     }
   });
 };
 
-// 提交入库
+// 入库提交
 const handleInboundSubmit = async () => {
   if (!inboundFormRef.value) return;
   
   await inboundFormRef.value.validate((valid) => {
     if (valid) {
-      currentRow.value.quantity += inboundForm.quantity;
-      ElMessage.success('入库成功');
-      dialogs.inbound = false;
+      if (currentRow.value) {
+        currentRow.value.quantity += inboundForm.quantity;
+        ElMessage.success('入库成功');
+        dialogs.inbound = false;
+      }
     }
   });
 };
 
-// 提交出库
+// 出库提交
 const handleOutboundSubmit = async () => {
   if (!outboundFormRef.value) return;
   
   await outboundFormRef.value.validate((valid) => {
     if (valid) {
-      if (outboundForm.quantity > currentRow.value.quantity) {
-        ElMessage.error('出库数量不能大于库存数量');
-        return;
+      if (currentRow.value) {
+        if (outboundForm.quantity > currentRow.value.quantity) {
+          ElMessage.error('出库数量不能大于库存数量');
+          return;
+        }
+        currentRow.value.quantity -= outboundForm.quantity;
+        ElMessage.success('出库成功');
+        dialogs.outbound = false;
       }
-      currentRow.value.quantity -= outboundForm.quantity;
-      ElMessage.success('出库成功');
-      dialogs.outbound = false;
     }
   });
 };

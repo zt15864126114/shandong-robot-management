@@ -94,7 +94,7 @@
       title="采购单详情"
       width="800px"
     >
-      <el-descriptions :column="2" border>
+      <el-descriptions v-if="currentRow" :column="2" border>
         <el-descriptions-item label="采购单号">{{ currentRow.code }}</el-descriptions-item>
         <el-descriptions-item label="供应商">{{ currentRow.supplier }}</el-descriptions-item>
         <el-descriptions-item label="采购金额">¥{{ currentRow.amount?.toFixed(2) }}</el-descriptions-item>
@@ -108,7 +108,7 @@
 
       <el-divider>采购明细</el-divider>
 
-      <el-table :data="currentRow.items" border style="width: 100%">
+      <el-table :data="currentRow?.items || []" border style="width: 100%">
         <el-table-column prop="name" label="商品名称" />
         <el-table-column prop="quantity" label="数量" width="120" />
         <el-table-column prop="price" label="单价" width="150">
@@ -130,6 +130,7 @@
 import { ref, reactive } from 'vue';
 import { Search } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import type { Purchase } from '@/types/purchase';
 
 // 查询参数
 const query = ref({
@@ -464,7 +465,7 @@ const dialogs = reactive({
   view: false
 });
 
-const currentRow = ref({});
+const currentRow = ref<Purchase | null>(null);
 </script>
 
 <style scoped lang="scss">

@@ -169,13 +169,22 @@ const visible = computed({
 const formRef = ref<FormInstance>();
 const loading = ref(false);
 
-// 表单数据
-const form = ref({
+interface OrderForm {
+  customer: string;
+  productType: string;
+  productModel: string;
+  amount: number;
+  status: string;
+  deliveryTime: string;
+  remark: string;
+}
+
+const form = ref<OrderForm>({
   customer: '',
   productType: '',
   productModel: '',
   amount: 0,
-  status: 'unpaid',
+  status: 'pending',
   deliveryTime: '',
   remark: ''
 });
@@ -199,17 +208,7 @@ const rules = {
 // 监听编辑数据变化
 watch(() => props.order, (newVal) => {
   if (newVal) {
-    form.value = { ...newVal };
-  } else {
-    form.value = {
-      customer: '',
-      productType: '',
-      productModel: '',
-      amount: 0,
-      status: 'unpaid',
-      deliveryTime: '',
-      remark: ''
-    };
+    form.value = { ...form.value, ...newVal as OrderForm };
   }
 }, { immediate: true });
 

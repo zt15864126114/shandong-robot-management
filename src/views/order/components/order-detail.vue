@@ -4,7 +4,7 @@
     v-model="visible"
     width="800px"
   >
-    <el-descriptions :column="2" border>
+    <el-descriptions v-if="order" :column="2" border>
       <el-descriptions-item label="订单编号">{{ order?.orderNo }}</el-descriptions-item>
       <el-descriptions-item label="订单状态">
         <el-tag :type="getStatusType(order?.status)">
@@ -70,13 +70,10 @@ import { computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import type { Order, OrderStatus } from '@/types/order';
 
-const props = defineProps({
-  modelValue: Boolean,
-  order: {
-    type: Object as () => Order,
-    required: true
-  }
-});
+const props = defineProps<{
+  modelValue: boolean;
+  order?: Order;
+}>();
 
 const emit = defineEmits(['update:modelValue', 'success']);
 
