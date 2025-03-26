@@ -6,7 +6,7 @@
           <div class="left">
             <el-input
               v-model="query.keyword"
-              placeholder="请输入采购单号/供应商"
+              placeholder="请输入采购单号/商品名称"
               style="width: 300px"
               clearable
               @keyup.enter="handleSearch"
@@ -31,46 +31,47 @@
             />
             <el-button type="primary" @click="handleSearch">搜索</el-button>
           </div>
-          <el-button type="primary" @click="handleAdd">新增采购单</el-button>
+          <div class="right">
+            <el-button type="primary" @click="handleAdd">新增采购</el-button>
+          </div>
         </div>
       </template>
 
       <div class="table-container">
         <el-table :data="purchaseList" border style="width: 100%" height="100%">
-          <el-table-column prop="code" label="采购单号" width="180" />
-          <el-table-column prop="supplier" label="供应商" />
-          <el-table-column prop="amount" label="采购金额" width="120">
+          <el-table-column prop="code" label="采购单号" min-width="180" />
+          <el-table-column prop="supplier" label="供应商" min-width="200" />
+          <el-table-column prop="amount" label="采购金额" min-width="120">
             <template #default="{ row }">
               ¥{{ row.amount.toFixed(2) }}
             </template>
           </el-table-column>
-          <el-table-column prop="createTime" label="创建时间" width="180" />
-          <el-table-column prop="status" label="状态" width="100">
+          <el-table-column prop="status" label="状态" min-width="100">
             <template #default="{ row }">
               <el-tag :type="getStatusType(row.status)">
                 {{ getStatusText(row.status) }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="200" fixed="right">
+          <el-table-column prop="operator" label="操作人" min-width="120" />
+          <el-table-column prop="createTime" label="创建时间" min-width="180" />
+          <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button 
-                v-if="row.status === 'pending'" 
-                link 
-                type="primary" 
-                @click="handleApprove(row)"
-              >
-                审核
-              </el-button>
-              <el-button link type="primary" @click="handleView(row)">查看</el-button>
-              <el-button 
-                v-if="row.status === 'pending'" 
-                link 
-                type="danger" 
-                @click="handleCancel(row)"
-              >
-                取消
-              </el-button>
+              <div class="operation-buttons">
+                <template v-if="row.status === 'pending'">
+                  <a @click="handleEdit(row)">编辑</a>
+                  <a @click="handleApprove(row)">审核</a>
+                  <a class="danger" @click="handleCancel(row)">取消</a>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+                <template v-else-if="row.status === 'approved'">
+                  <a class="success" @click="handleComplete(row)">完成</a>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+                <template v-else>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -89,297 +90,431 @@
       </div>
     </el-card>
 
+    <!-- 采购表单对话框 -->
     <el-dialog
-      v-model="dialogs.view"
-      title="采购单详情"
-      width="800px"
+      v-model="dialog.visible"
+      :title="dialog.type === 'add' ? '新增采购' : dialog.type === 'edit' ? '编辑采购' : '采购详情'"
+      width="1000px"
     >
-      <el-descriptions v-if="currentRow" :column="2" border>
-        <el-descriptions-item label="采购单号">{{ currentRow.code }}</el-descriptions-item>
-        <el-descriptions-item label="供应商">{{ currentRow.supplier }}</el-descriptions-item>
-        <el-descriptions-item label="采购金额">¥{{ currentRow.amount?.toFixed(2) }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentRow.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="状态">
-          <el-tag :type="getStatusType(currentRow.status)">
-            {{ getStatusText(currentRow.status) }}
-          </el-tag>
-        </el-descriptions-item>
-      </el-descriptions>
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-width="100px"
+        :disabled="dialog.type === 'view'"
+      >
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="采购单号" prop="code">
+              <el-input v-model="form.code" placeholder="请输入采购单号" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="供应商" prop="supplier">
+              <el-select v-model="form.supplier" placeholder="请选择供应商" style="width: 100%">
+                <el-option
+                  v-for="item in supplierOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-      <el-divider>采购明细</el-divider>
+        <el-form-item label="采购商品">
+          <el-table :data="form.products" border style="width: 100%">
+            <el-table-column type="index" label="序号" width="50" />
+            <el-table-column prop="name" label="商品名称" min-width="200">
+              <template #default="{ row, $index }">
+                <el-select 
+                  v-model="row.name" 
+                  placeholder="请选择商品"
+                  style="width: 100%"
+                  :disabled="dialog.type === 'view'"
+                >
+                  <el-option
+                    v-for="item in productOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column prop="spec" label="规格型号" min-width="150">
+              <template #default="{ row }">
+                <el-input v-model="row.spec" placeholder="请输入规格型号" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="quantity" label="数量" width="120">
+              <template #default="{ row }">
+                <el-input-number v-model="row.quantity" :min="1" style="width: 100%" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="price" label="单价" width="120">
+              <template #default="{ row }">
+                <el-input-number v-model="row.price" :min="0" :precision="2" style="width: 100%" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="amount" label="金额" width="120">
+              <template #default="{ row }">
+                {{ (row.quantity * row.price).toFixed(2) }}
+              </template>
+            </el-table-column>
+            <el-table-column v-if="dialog.type !== 'view'" label="操作" width="80">
+              <template #default="{ $index }">
+                <el-button link type="danger" @click="handleRemoveProduct($index)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div v-if="dialog.type !== 'view'" style="margin-top: 10px">
+            <el-button type="primary" @click="handleAddProduct">添加商品</el-button>
+          </div>
+        </el-form-item>
 
-      <el-table :data="currentRow?.items || []" border style="width: 100%">
-        <el-table-column prop="name" label="商品名称" />
-        <el-table-column prop="quantity" label="数量" width="120" />
-        <el-table-column prop="price" label="单价" width="150">
-          <template #default="{ row }">
-            ¥{{ row.price?.toFixed(2) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="小计" width="150">
-          <template #default="{ row }">
-            ¥{{ (row.price * row.quantity)?.toFixed(2) }}
-          </template>
-        </el-table-column>
-      </el-table>
+        <el-form-item label="备注" prop="remark">
+          <el-input
+            v-model="form.remark"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入备注"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialog.visible = false">取消</el-button>
+        <el-button 
+          v-if="dialog.type !== 'view'" 
+          type="primary" 
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 审核对话框 -->
+    <el-dialog
+      v-model="approveDialog.visible"
+      title="采购审核"
+      width="500px"
+    >
+      <el-form
+        ref="approveFormRef"
+        :model="approveForm"
+        :rules="approveRules"
+        label-width="100px"
+      >
+        <el-form-item label="审核意见" prop="remark">
+          <el-input
+            v-model="approveForm.remark"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入审核意见"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="approveDialog.visible = false">取消</el-button>
+        <el-button type="primary" @click="handleApproveSubmit">确定</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { Search } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import type { Purchase } from '@/types/purchase';
+import type { FormInstance, FormRules } from 'element-plus';
 
-// 查询参数
+// 查询条件
 const query = ref({
   page: 1,
   pageSize: 10,
   keyword: '',
   status: '',
-  dateRange: []
+  dateRange: [] as string[]
 });
 
 // 采购列表
 const purchaseList = ref([
   {
     id: 1,
-    code: 'CG202403200001',
+    code: 'CG20250301001',
     supplier: '发那科（中国）有限公司',
-    amount: 1568000.00,
-    createTime: '2025-02-20 09:30:00',
+    amount: 320000.00,
     status: 'completed',
-    items: [
-      { name: '工业机器人本体', quantity: 5, price: 286000.00 },
-      { name: '控制系统', quantity: 5, price: 27600.00 }
-    ]
+    operator: '刘明阳',
+    createTime: '2025-03-01 09:30:00',
+    products: [
+      { name: '发那科机器人 CR-7iA', spec: 'CR-7iA', quantity: 2, price: 160000.00 }
+    ],
+    remark: '机器人本体采购'
   },
   {
     id: 2,
-    code: 'CG202403200002',
-    supplier: '安川（中国）机器人有限公司',
-    amount: 986000.00,
-    createTime: '2025-02-20 10:15:00',
+    code: 'CG20250301002',
+    supplier: '西门子（中国）有限公司',
+    amount: 85000.00,
     status: 'approved',
-    items: [
-      { name: '四轴机器人', quantity: 4, price: 246500.00 }
-    ]
+    operator: '王建国',
+    createTime: '2025-03-01 14:00:00',
+    products: [
+      { name: '西门子S7-1500 PLC', spec: 'S7-1500', quantity: 5, price: 17000.00 }
+    ],
+    remark: '自动化控制系统采购'
   },
   {
     id: 3,
-    code: 'CG202403200003',
-    supplier: '库卡机器人（上海）有限公司',
-    amount: 1286000.00,
-    createTime: '2025-02-20 11:30:00',
+    code: 'CG20250302001',
+    supplier: '安川（中国）机器人有限公司',
+    amount: 450000.00,
     status: 'pending',
-    items: [
-      { name: '协作机器人', quantity: 3, price: 428666.67 }
-    ]
+    operator: '张志强',
+    createTime: '2025-03-02 10:15:00',
+    products: [
+      { name: '安川机器人 GP8', spec: 'GP8', quantity: 5, price: 90000.00 }
+    ],
+    remark: '机器人本体采购'
   },
   {
     id: 4,
-    code: 'CG202403200004',
-    supplier: '西门子（中国）有限公司',
-    amount: 568000.00,
-    createTime: '2025-02-20 13:45:00',
-    status: 'pending',
-    items: [
-      { name: '伺服驱动器', quantity: 50, price: 8960.00 },
-      { name: '伺服电机', quantity: 50, price: 2400.00 }
-    ]
+    code: 'CG20250302002',
+    supplier: '欧姆龙自动化（中国）有限公司',
+    amount: 25000.00,
+    status: 'completed',
+    operator: '陈海波',
+    createTime: '2025-03-02 13:45:00',
+    products: [
+      { name: '欧姆龙光电传感器', spec: 'E3Z-T61', quantity: 100, price: 250.00 }
+    ],
+    remark: '传感器采购'
   },
   {
     id: 5,
-    code: 'CG202403200005',
-    supplier: '基恩士（中国）有限公司',
-    amount: 386000.00,
-    createTime: '2025-02-20 14:30:00',
-    status: 'pending',
-    items: [
-      { name: '视觉传感器', quantity: 30, price: 12866.67 }
-    ]
+    code: 'CG20250302003',
+    supplier: '倍加福工业自动化（中国）有限公司',
+    amount: 18000.00,
+    status: 'cancelled',
+    operator: '李伟东',
+    createTime: '2025-03-02 16:30:00',
+    products: [
+      { name: '倍加福接近开关', spec: 'NBB4-12GM50-E0', quantity: 30, price: 600.00 }
+    ],
+    remark: '接近开关采购-已取消'
   },
   {
     id: 6,
-    code: 'CG202403200006',
-    supplier: 'ATI工业自动化',
-    amount: 256000.00,
-    createTime: '2025-02-20 15:10:00',
+    code: 'CG20250303001',
+    supplier: '三菱电机自动化（中国）有限公司',
+    amount: 95000.00,
     status: 'pending',
-    items: [
-      { name: '力矩传感器', quantity: 20, price: 12800.00 }
-    ]
+    operator: '刘明阳',
+    createTime: '2025-03-03 09:15:00',
+    products: [
+      { name: '三菱伺服电机', spec: 'HG-KR43', quantity: 5, price: 19000.00 }
+    ],
+    remark: '伺服系统采购'
   },
   {
     id: 7,
-    code: 'CG202403200007',
-    supplier: '欧姆龙（中国）有限公司',
-    amount: 328000.00,
-    createTime: '2025-02-20 15:45:00',
-    status: 'pending',
-    items: [
-      { name: '安全光栅', quantity: 40, price: 5200.00 },
-      { name: '安全控制器', quantity: 20, price: 6800.00 }
-    ]
+    code: 'CG20250303002',
+    supplier: '基恩士（中国）有限公司',
+    amount: 280000.00,
+    status: 'approved',
+    operator: '王建国',
+    createTime: '2025-03-03 11:30:00',
+    products: [
+      { name: '基恩士视觉系统', spec: 'CV-X150F', quantity: 2, price: 140000.00 }
+    ],
+    remark: '视觉检测系统采购'
   },
   {
     id: 8,
-    code: 'CG202403200008',
-    supplier: '倍加福工业自动化（中国）有限公司',
-    amount: 198000.00,
-    createTime: '2025-02-20 16:00:00',
-    status: 'pending',
-    items: [
-      { name: '激光测距传感器', quantity: 25, price: 7920.00 }
-    ]
+    code: 'CG20250303003',
+    supplier: '图尔克（天津）传感器有限公司',
+    amount: 42000.00,
+    status: 'completed',
+    operator: '张志强',
+    createTime: '2025-03-03 14:45:00',
+    products: [
+      { name: '图尔克接近开关', spec: 'BI5-M18-AP6X', quantity: 60, price: 700.00 }
+    ],
+    remark: '接近开关批量采购'
   },
   {
     id: 9,
-    code: 'CG202403200009',
-    supplier: '施耐德电气（中国）有限公司',
-    amount: 436000.00,
-    createTime: '2025-02-20 16:15:00',
+    code: 'CG20250304001',
+    supplier: '魏德米勒电联接（上海）有限公司',
+    amount: 15000.00,
     status: 'pending',
-    items: [
-      { name: '工业交换机', quantity: 20, price: 12800.00 },
-      { name: '工业电源', quantity: 50, price: 3600.00 }
-    ]
+    operator: '陈海波',
+    createTime: '2025-03-04 10:00:00',
+    products: [
+      { name: '魏德米勒端子', spec: 'WDU 2.5', quantity: 1000, price: 15.00 }
+    ],
+    remark: '接线端子采购'
   },
   {
     id: 10,
-    code: 'CG202403200010',
-    supplier: '图尔克（天津）传感器有限公司',
-    amount: 156000.00,
-    createTime: '2025-02-20 16:30:00',
-    status: 'pending',
-    items: [
-      { name: '接近传感器', quantity: 200, price: 780.00 }
-    ]
+    code: 'CG20250304002',
+    supplier: '库卡机器人（上海）有限公司',
+    amount: 580000.00,
+    status: 'approved',
+    operator: '李伟东',
+    createTime: '2025-03-04 13:20:00',
+    products: [
+      { name: '库卡机器人', spec: 'KR10 R1100', quantity: 2, price: 290000.00 }
+    ],
+    remark: '机器人本体采购'
   },
   {
     id: 11,
-    code: 'CG202403200011',
-    supplier: '邦纳工程国际有限公司',
-    amount: 245000.00,
-    createTime: '2025-02-20 16:45:00',
-    status: 'pending',
-    items: [
-      { name: '光电传感器', quantity: 150, price: 1633.33 }
-    ]
+    code: 'CG20250304003',
+    supplier: '欧姆龙自动化（中国）有限公司',
+    amount: 68000.00,
+    status: 'completed',
+    operator: '刘明阳',
+    createTime: '2025-03-04 15:40:00',
+    products: [
+      { name: '欧姆龙PLC', spec: 'NX1P2', quantity: 4, price: 17000.00 }
+    ],
+    remark: '控制系统采购'
   },
   {
     id: 12,
-    code: 'CG202403200012',
-    supplier: '菲尼克斯（中国）投资有限公司',
-    amount: 168000.00,
-    createTime: '2025-02-20 17:00:00',
+    code: 'CG20250305001',
+    supplier: '邦纳工程国际有限公司',
+    amount: 32000.00,
     status: 'pending',
-    items: [
-      { name: '端子排', quantity: 2000, price: 84.00 }
-    ]
+    operator: '王建国',
+    createTime: '2025-03-05 09:30:00',
+    products: [
+      { name: '邦纳光电传感器', spec: 'QS18VP6', quantity: 40, price: 800.00 }
+    ],
+    remark: '光电传感器采购'
   },
   {
     id: 13,
-    code: 'CG202403200013',
-    supplier: '魏德米勒电联接（上海）有限公司',
-    amount: 186000.00,
-    createTime: '2025-02-20 17:15:00',
-    status: 'pending',
-    items: [
-      { name: '接线端子', quantity: 3000, price: 62.00 }
-    ]
+    code: 'CG20250305002',
+    supplier: '力士乐（中国）有限公司',
+    amount: 45000.00,
+    status: 'approved',
+    operator: '张志强',
+    createTime: '2025-03-05 11:15:00',
+    products: [
+      { name: '力士乐气缸', spec: 'R480', quantity: 15, price: 3000.00 }
+    ],
+    remark: '气动元件采购'
   },
   {
     id: 14,
-    code: 'CG202403200014',
-    supplier: '贝加莱工业自动化（中国）有限公司',
-    amount: 486000.00,
-    createTime: '2025-02-20 17:30:00',
+    code: 'CG20250305003',
+    supplier: '施耐德电气（中国）有限公司',
+    amount: 96000.00,
     status: 'pending',
-    items: [
-      { name: '工业PC', quantity: 15, price: 32400.00 }
-    ]
+    operator: '陈海波',
+    createTime: '2025-03-05 14:00:00',
+    products: [
+      { name: '施耐德变频器', spec: 'ATV320', quantity: 8, price: 12000.00 }
+    ],
+    remark: '变频器采购'
   },
   {
     id: 15,
-    code: 'CG202403200015',
-    supplier: '三菱电机自动化（中国）有限公司',
-    amount: 658000.00,
-    createTime: '2025-02-20 17:45:00',
-    status: 'pending',
-    items: [
-      { name: 'PLC控制器', quantity: 20, price: 18600.00 },
-      { name: '触摸屏', quantity: 20, price: 14300.00 }
-    ]
-  },
-  {
-    id: 16,
-    code: 'CG202403200016',
-    supplier: '易格斯（上海）有限公司',
-    amount: 235000.00,
-    createTime: '2025-02-20 18:00:00',
-    status: 'pending',
-    items: [
-      { name: '拖链', quantity: 50, price: 4700.00 }
-    ]
-  },
-  {
-    id: 17,
-    code: 'CG202403200017',
-    supplier: '堡盟电子（上海）有限公司',
-    amount: 298000.00,
-    createTime: '2025-02-20 18:15:00',
-    status: 'pending',
-    items: [
-      { name: '编码器', quantity: 100, price: 2980.00 }
-    ]
-  },
-  {
-    id: 18,
-    code: 'CG202403200018',
-    supplier: '威图电子机械技术（上海）有限公司',
-    amount: 486000.00,
-    createTime: '2025-02-20 18:30:00',
-    status: 'pending',
-    items: [
-      { name: '控制柜', quantity: 30, price: 16200.00 }
-    ]
-  },
-  {
-    id: 19,
-    code: 'CG202403200019',
+    code: 'CG20250305004',
     supplier: '雷尼绍（上海）贸易有限公司',
-    amount: 568000.00,
-    createTime: '2025-02-20 18:45:00',
-    status: 'pending',
-    items: [
-      { name: '光栅尺', quantity: 40, price: 14200.00 }
-    ]
-  },
-  {
-    id: 20,
-    code: 'CG202403200020',
-    supplier: '康耐视视觉检测系统（上海）有限公司',
-    amount: 486000.00,
-    createTime: '2025-02-20 19:00:00',
-    status: 'pending',
-    items: [
-      { name: '工业相机', quantity: 20, price: 15800.00 },
-      { name: '镜头', quantity: 20, price: 8500.00 }
-    ]
+    amount: 180000.00,
+    status: 'completed',
+    operator: '李伟东',
+    createTime: '2025-03-05 16:30:00',
+    products: [
+      { name: '雷尼绍测量系统', spec: 'RMP60', quantity: 2, price: 90000.00 }
+    ],
+    remark: '测量系统采购'
   }
 ]);
 
-// 总数
 const total = ref(100);
+
+// 对话框状态
+const dialog = reactive({
+  visible: false,
+  type: 'add' as 'add' | 'edit' | 'view'
+});
+
+// 审核对话框
+const approveDialog = reactive({
+  visible: false,
+  data: {} as any
+});
+
+// 表单数据
+const form = reactive({
+  code: '',
+  supplier: '',
+  products: [] as any[],
+  remark: ''
+});
+
+// 审核表单
+const approveForm = reactive({
+  id: '',
+  remark: ''
+});
+
+// 供应商选项
+const supplierOptions = [
+  { value: '发那科（中国）有限公司', label: '发那科（中国）有限公司' },
+  { value: '西门子（中国）有限公司', label: '西门子（中国）有限公司' },
+  { value: '安川（中国）机器人有限公司', label: '安川（中国）机器人有限公司' },
+  { value: '欧姆龙自动化（中国）有限公司', label: '欧姆龙自动化（中国）有限公司' },
+  { value: '倍加福工业自动化（中国）有限公司', label: '倍加福工业自动化（中国）有限公司' },
+  { value: '三菱电机自动化（中国）有限公司', label: '三菱电机自动化（中国）有限公司' },
+  { value: '基恩士（中国）有限公司', label: '基恩士（中国）有限公司' },
+  { value: '图尔克（天津）传感器有限公司', label: '图尔克（天津）传感器有限公司' },
+  { value: '魏德米勒电联接（上海）有限公司', label: '魏德米勒电联接（上海）有限公司' },
+  { value: '库卡机器人（上海）有限公司', label: '库卡机器人（上海）有限公司' }
+];
+
+// 商品选项
+const productOptions = [
+  { value: '发那科机器人 CR-7iA', label: '发那科机器人 CR-7iA' },
+  { value: '西门子S7-1500 PLC', label: '西门子S7-1500 PLC' },
+  { value: '安川机器人 GP8', label: '安川机器人 GP8' },
+  { value: '欧姆龙光电传感器', label: '欧姆龙光电传感器' },
+  { value: '倍加福接近开关', label: '倍加福接近开关' },
+  { value: '三菱伺服电机', label: '三菱伺服电机' },
+  { value: '基恩士视觉系统', label: '基恩士视觉系统' },
+  { value: '图尔克接近开关', label: '图尔克接近开关' },
+  { value: '魏德米勒端子', label: '魏德米勒端子' },
+  { value: '库卡机器人', label: '库卡机器人' }
+];
+
+// 表单规则
+const rules = reactive<FormRules>({
+  code: [{ required: true, message: '请输入采购单号', trigger: 'blur' }],
+  supplier: [{ required: true, message: '请选择供应商', trigger: 'change' }],
+  products: [{ required: true, message: '请添加采购商品', trigger: 'change' }]
+});
+
+// 审核表单规则
+const approveRules = reactive<FormRules>({
+  remark: [{ required: true, message: '请输入审核意见', trigger: 'blur' }]
+});
+
+const formRef = ref<FormInstance>();
+const approveFormRef = ref<FormInstance>();
 
 // 获取状态类型
 const getStatusType = (status: string) => {
   const map: Record<string, string> = {
     pending: 'warning',
-    approved: 'primary',
-    completed: 'success',
+    approved: 'success',
+    completed: 'primary',
     cancelled: 'info'
   };
   return map[status] || 'info';
@@ -393,102 +528,200 @@ const getStatusText = (status: string) => {
     completed: '已完成',
     cancelled: '已取消'
   };
-  return map[status] || '未知';
+  return map[status] || status;
 };
+
+// 计算采购总金额
+const calculateAmount = computed(() => {
+  return form.products.reduce((total, item) => total + (item.quantity * item.price), 0);
+});
 
 // 搜索
 const handleSearch = () => {
   query.value.page = 1;
-  loadPurchaseList();
+  loadData();
 };
 
-// 加载采购列表
-const loadPurchaseList = () => {
-  // 这里应该调用API获取数据
+// 加载数据
+const loadData = () => {
+  // TODO: 调用API获取数据
   console.log('加载采购列表:', query.value);
 };
 
-// 新增采购单
+// 新增采购
 const handleAdd = () => {
-  console.log('新增采购单');
+  dialog.type = 'add';
+  Object.assign(form, {
+    code: '',
+    supplier: '',
+    products: [],
+    remark: ''
+  });
+  dialog.visible = true;
 };
 
-// 审核采购单
-const handleApprove = (row: any) => {
-  ElMessageBox.confirm(
-    '确定要审核通过该采购单吗？',
-    '提示',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }
-  ).then(() => {
-    console.log('审核采购单:', row);
-    ElMessage.success('审核成功');
-  }).catch(() => {});
+// 编辑采购
+const handleEdit = (row: any) => {
+  dialog.type = 'edit';
+  Object.assign(form, row);
+  dialog.visible = true;
 };
 
-// 查看采购单
+// 查看采购
 const handleView = (row: any) => {
-  currentRow.value = row;
-  dialogs.view = true;
+  dialog.type = 'view';
+  Object.assign(form, row);
+  dialog.visible = true;
 };
 
-// 取消采购单
-const handleCancel = (row: any) => {
-  ElMessageBox.confirm(
-    '确定要取消该采购单吗？',
-    '提示',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
+// 审核采购
+const handleApprove = (row: any) => {
+  approveDialog.data = row;
+  approveForm.id = row.id;
+  approveForm.remark = '';
+  approveDialog.visible = true;
+};
+
+// 完成采购
+const handleComplete = (row: any) => {
+  ElMessageBox.confirm('确认完成该采购单？', '提示', {
+    type: 'warning'
+  }).then(() => {
+    const index = purchaseList.value.findIndex(item => item.id === row.id);
+    if (index !== -1) {
+      purchaseList.value[index].status = 'completed';
+      ElMessage.success('操作成功');
     }
-  ).then(() => {
-    console.log('取消采购单:', row);
-    ElMessage.success('取消成功');
-  }).catch(() => {});
+  });
 };
 
-// 分页大小改变
+// 取消采购
+const handleCancel = (row: any) => {
+  ElMessageBox.confirm('确认取消该采购单？', '提示', {
+    type: 'warning'
+  }).then(() => {
+    const index = purchaseList.value.findIndex(item => item.id === row.id);
+    if (index !== -1) {
+      purchaseList.value[index].status = 'cancelled';
+      ElMessage.success('操作成功');
+    }
+  });
+};
+
+// 添加商品
+const handleAddProduct = () => {
+  form.products.push({
+    name: '',
+    spec: '',
+    quantity: 1,
+    price: 0
+  });
+};
+
+// 删除商品
+const handleRemoveProduct = (index: number) => {
+  form.products.splice(index, 1);
+};
+
+// 提交表单
+const handleSubmit = async () => {
+  if (!formRef.value) return;
+  
+  await formRef.value.validate((valid) => {
+    if (valid) {
+      if (dialog.type === 'add') {
+        purchaseList.value.unshift({
+          id: purchaseList.value.length + 1,
+          ...form,
+          amount: calculateAmount.value,
+          status: 'pending',
+          operator: '当前用户',
+          createTime: new Date().toLocaleString()
+        });
+        ElMessage.success('添加成功');
+      } else {
+        const index = purchaseList.value.findIndex(item => item.id === form.id);
+        if (index !== -1) {
+          Object.assign(purchaseList.value[index], {
+            ...form,
+            amount: calculateAmount.value
+          });
+          ElMessage.success('修改成功');
+        }
+      }
+      dialog.visible = false;
+    }
+  });
+};
+
+// 提交审核
+const handleApproveSubmit = async () => {
+  if (!approveFormRef.value) return;
+  
+  await approveFormRef.value.validate((valid) => {
+    if (valid) {
+      const index = purchaseList.value.findIndex(item => item.id === approveForm.id);
+      if (index !== -1) {
+        purchaseList.value[index].status = 'approved';
+        ElMessage.success('审核通过');
+      }
+      approveDialog.visible = false;
+    }
+  });
+};
+
+// 分页
 const handleSizeChange = () => {
-  loadPurchaseList();
+  loadData();
 };
 
-// 页码改变
 const handleCurrentChange = () => {
-  loadPurchaseList();
+  loadData();
 };
-
-const dialogs = reactive({
-  view: false
-});
-
-const currentRow = ref<Purchase | null>(null);
 </script>
 
 <style scoped lang="scss">
 .purchase-container {
   padding: 20px;
-  height: 100%;
-  overflow-y: auto;
+  height: calc(100vh - 84px);
+  display: flex;
+  flex-direction: column;
+
+  .el-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    :deep(.el-card__body) {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+  }
 
   .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
     
     .left {
       display: flex;
       align-items: center;
       gap: 16px;
     }
+
+    .right {
+      display: flex;
+      gap: 16px;
+    }
   }
 
   .table-container {
+    flex: 1;
+    overflow: hidden;
     margin: 20px 0;
-    height: 500px;
     
     :deep(.el-table) {
       height: 100%;
@@ -498,7 +731,38 @@ const currentRow = ref<Purchase | null>(null);
   .pagination-container {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 20px;
+    margin-top: 20px;
+    flex-shrink: 0;
+  }
+
+  :deep(.operation-buttons) {
+    display: flex;
+    gap: 8px;
+    
+    a {
+      color: var(--el-color-primary);
+      cursor: pointer;
+      
+      &:hover {
+        color: var(--el-color-primary-light-3);
+      }
+      
+      &.danger {
+        color: var(--el-color-danger);
+        
+        &:hover {
+          color: var(--el-color-danger-light-3);
+        }
+      }
+      
+      &.success {
+        color: var(--el-color-success);
+        
+        &:hover {
+          color: var(--el-color-success-light-3);
+        }
+      }
+    }
   }
 }
 </style> 

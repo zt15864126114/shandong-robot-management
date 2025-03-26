@@ -294,7 +294,7 @@ const dataList = ref([
     remark: '新产品上市'
   },
   {
-    date: '2024-02',
+    date: '2025-02',
     revenue: 3200000.00,
     cost: 2600000.00,
     profit: 600000.00,
@@ -303,7 +303,7 @@ const dataList = ref([
     remark: '正常'
   },
   {
-    date: '2024-01',
+    date: '2025-01',
     revenue: 2800000.00,
     cost: 2300000.00,
     profit: 500000.00,

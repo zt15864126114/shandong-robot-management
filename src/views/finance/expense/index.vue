@@ -79,10 +79,23 @@
           </el-table-column>
           <el-table-column prop="createTime" label="创建时间" width="180" />
           <el-table-column prop="remark" label="备注" show-overflow-tooltip />
-          <el-table-column label="操作" width="120" fixed="right">
+          <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-              <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+              <div class="operation-buttons">
+                <template v-if="row.status === 'pending'">
+                  <a @click="handleEdit(row)">编辑</a>
+                  <a @click="handleApprove(row)">审核</a>
+                  <a class="danger" @click="handleDelete(row)">删除</a>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+                <template v-else-if="row.status === 'approved'">
+                  <a class="success" @click="handleComplete(row)">确认付款</a>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+                <template v-else>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -145,6 +158,36 @@
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- 查看详情对话框 -->
+    <el-dialog
+      v-model="dialogs.view"
+      title="支出详情"
+      width="600px"
+    >
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="支出单号">{{ viewData.code }}</el-descriptions-item>
+        <el-descriptions-item label="支出类型">
+          {{ getTypeText(viewData.type) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="支出用途">{{ viewData.purpose }}</el-descriptions-item>
+        <el-descriptions-item label="支出金额">
+          <span class="amount-down">¥{{ viewData.amount?.toFixed(2) }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ viewData.createTime }}</el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag :type="viewData.status === 'pending' ? 'warning' : viewData.status === 'approved' ? 'primary' : 'success'">
+            {{ viewData.status === 'pending' ? '待处理' : viewData.status === 'approved' ? '已审核' : '已完成' }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="备注" :span="2">{{ viewData.remark }}</el-descriptions-item>
+      </el-descriptions>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogs.view = false">关闭</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -167,52 +210,57 @@ const query = ref({
 const expenseList = ref([
   {
     id: 1,
-    code: 'ZC202403200001',
+    code: 'ZC202503200001',
     type: 'purchase',
     purpose: '采购工业机器人核心部件',
     amount: 285600.00,
     createTime: '2025-02-20 09:30:00',
-    remark: '用于新产品研发'
+    remark: '用于新产品研发',
+    status: 'pending'
   },
   {
     id: 2,
-    code: 'ZC202403200002',
+    code: 'ZC202503200002',
     type: 'salary',
     purpose: '研发部门工资',
     amount: 458900.00,
     createTime: '2025-02-20 10:15:00',
-    remark: '3月份工资'
+    remark: '3月份工资',
+    status: 'approved'
   },
   {
     id: 3,
-    code: 'ZC202403200003',
+    code: 'ZC202503200003',
     type: 'purchase',
     purpose: '采购传感器模块',
     amount: 156800.00,
     createTime: '2025-02-20 11:20:00',
-    remark: '智能控制系统升级'
+    remark: '智能控制系统升级',
+    status: 'pending'
   },
   {
     id: 4,
-    code: 'ZC202403200004',
+    code: 'ZC202503200004',
     type: 'other',
     purpose: '办公设备更新',
     amount: 89500.00,
     createTime: '2025-02-20 13:45:00',
-    remark: '更新研发部门设备'
+    remark: '更新研发部门设备',
+    status: 'completed'
   },
   {
     id: 5,
-    code: 'ZC202403200005',
+    code: 'ZC202503200005',
     type: 'purchase',
     purpose: '原材料采购',
     amount: 235600.00,
     createTime: '2025-02-20 14:30:00',
-    remark: '生产线原材料补充'
+    remark: '生产线原材料补充',
+    status: 'pending'
   },
   {
     id: 6,
-    code: 'ZC202403200006',
+    code: 'ZC202503200006',
     type: 'other',
     purpose: '研发实验室装修',
     amount: 168000.00,
@@ -221,7 +269,7 @@ const expenseList = ref([
   },
   {
     id: 7,
-    code: 'ZC202403200007',
+    code: 'ZC202503200007',
     type: 'purchase',
     purpose: '采购测试设备',
     amount: 198500.00,
@@ -230,7 +278,7 @@ const expenseList = ref([
   },
   {
     id: 8,
-    code: 'ZC202403200008',
+    code: 'ZC202503200008',
     type: 'salary',
     purpose: '生产部门工资',
     amount: 386500.00,
@@ -239,7 +287,7 @@ const expenseList = ref([
   },
   {
     id: 9,
-    code: 'ZC202403200009',
+    code: 'ZC202503200009',
     type: 'purchase',
     purpose: '采购机器人控制系统',
     amount: 326800.00,
@@ -248,7 +296,7 @@ const expenseList = ref([
   },
   {
     id: 10,
-    code: 'ZC202403200010',
+    code: 'ZC202503200010',
     type: 'other',
     purpose: '员工培训费用',
     amount: 85600.00,
@@ -257,7 +305,7 @@ const expenseList = ref([
   },
   {
     id: 11,
-    code: 'ZC202403200011',
+    code: 'ZC202503200011',
     type: 'purchase',
     purpose: '采购伺服电机',
     amount: 178500.00,
@@ -266,7 +314,7 @@ const expenseList = ref([
   },
   {
     id: 12,
-    code: 'ZC202403200012',
+    code: 'ZC202503200012',
     type: 'salary',
     purpose: '管理部门工资',
     amount: 265000.00,
@@ -275,7 +323,7 @@ const expenseList = ref([
   },
   {
     id: 13,
-    code: 'ZC202403200013',
+    code: 'ZC202503200013',
     type: 'other',
     purpose: '软件系统授权',
     amount: 156000.00,
@@ -284,7 +332,7 @@ const expenseList = ref([
   },
   {
     id: 14,
-    code: 'ZC202403200014',
+    code: 'ZC202503200014',
     type: 'purchase',
     purpose: '采购工业相机',
     amount: 145800.00,
@@ -328,7 +376,8 @@ const loadExpenseList = () => {
 
 // 对话框状态
 const dialogs = reactive({
-  form: false
+  form: false,
+  view: false
 });
 
 // 表单类型
@@ -428,7 +477,8 @@ const handleSubmit = async () => {
           id: expenseList.value.length + 1,
           code,
           ...form,
-          createTime
+          createTime,
+          status: 'pending'
         });
         ElMessage.success('添加成功');
       } else {
@@ -438,6 +488,15 @@ const handleSubmit = async () => {
       dialogs.form = false;
     }
   });
+};
+
+// 添加查看数据对象
+const viewData = ref({});
+
+// 添加查看方法
+const handleView = (row: any) => {
+  viewData.value = row;
+  dialogs.view = true;
 };
 </script>
 
@@ -507,6 +566,36 @@ const handleSubmit = async () => {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 20px;
+  }
+
+  :deep(.operation-buttons) {
+    display: flex;
+    gap: 8px;
+    
+    a {
+      color: var(--el-color-primary);
+      cursor: pointer;
+      
+      &:hover {
+        color: var(--el-color-primary-light-3);
+      }
+      
+      &.danger {
+        color: var(--el-color-danger);
+        
+        &:hover {
+          color: var(--el-color-danger-light-3);
+        }
+      }
+      
+      &.success {
+        color: var(--el-color-success);
+        
+        &:hover {
+          color: var(--el-color-success-light-3);
+        }
+      }
+    }
   }
 }
 </style> 

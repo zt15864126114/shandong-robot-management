@@ -78,10 +78,23 @@
           </el-table-column>
           <el-table-column prop="createTime" label="创建时间" width="180" />
           <el-table-column prop="remark" label="备注" show-overflow-tooltip />
-          <el-table-column label="操作" width="120" fixed="right">
+          <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-              <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+              <div class="operation-buttons">
+                <template v-if="row.status === 'pending'">
+                  <a @click="handleEdit(row)">编辑</a>
+                  <a @click="handleApprove(row)">审核</a>
+                  <a class="danger" @click="handleDelete(row)">删除</a>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+                <template v-else-if="row.status === 'approved'">
+                  <a class="success" @click="handleComplete(row)">确认收款</a>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+                <template v-else>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -143,6 +156,36 @@
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- 查看详情对话框 -->
+    <el-dialog
+      v-model="dialogs.view"
+      title="收入详情"
+      width="600px"
+    >
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="收入单号">{{ viewData.code }}</el-descriptions-item>
+        <el-descriptions-item label="收入类型">
+          {{ getTypeText(viewData.type) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="收入来源">{{ viewData.source }}</el-descriptions-item>
+        <el-descriptions-item label="收入金额">
+          <span class="amount-up">¥{{ viewData.amount?.toFixed(2) }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ viewData.createTime }}</el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag :type="viewData.status === 'pending' ? 'warning' : viewData.status === 'approved' ? 'primary' : 'success'">
+            {{ viewData.status === 'pending' ? '待处理' : viewData.status === 'approved' ? '已审核' : '已完成' }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="备注" :span="2">{{ viewData.remark }}</el-descriptions-item>
+      </el-descriptions>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogs.view = false">关闭</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -165,52 +208,57 @@ const query = ref({
 const incomeList = ref([
   {
     id: 1,
-    code: 'SR202403200001',
+    code: 'SR202503200001',
     type: 'order',
     source: '山东临工工程机械有限公司',
     amount: 586000.00,
     createTime: '2025-02-20 09:30:00',
-    remark: '工业机器人系统采购'
+    remark: '工业机器人系统采购',
+    status: 'pending'
   },
   {
     id: 2,
-    code: 'SR202403200002',
+    code: 'SR202503200002',
     type: 'order',
     source: '青岛海尔生物医疗股份有限公司',
     amount: 468000.00,
     createTime: '2025-02-20 10:15:00',
-    remark: '医疗机器人定制开发'
+    remark: '医疗机器人定制开发',
+    status: 'approved'
   },
   {
     id: 3,
-    code: 'SR202403200003',
+    code: 'SR202503200003',
     type: 'order',
     source: '山东新华医疗器械股份有限公司',
     amount: 385000.00,
     createTime: '2025-02-20 11:20:00',
-    remark: '手术辅助机器人系统'
+    remark: '手术辅助机器人系统',
+    status: 'pending'
   },
   {
     id: 4,
-    code: 'SR202403200004',
+    code: 'SR202503200004',
     type: 'other',
     source: '技术服务收入',
     amount: 156000.00,
     createTime: '2025-02-20 13:45:00',
-    remark: '系统维护服务费'
+    remark: '系统维护服务费',
+    status: 'completed'
   },
   {
     id: 5,
-    code: 'SR202403200005',
+    code: 'SR202503200005',
     type: 'order',
     source: '浪潮电子信息产业股份有限公司',
     amount: 658000.00,
     createTime: '2025-02-20 14:30:00',
-    remark: '智能制造系统集成'
+    remark: '智能制造系统集成',
+    status: 'pending'
   },
   {
     id: 6,
-    code: 'SR202403200006',
+    code: 'SR202503200006',
     type: 'order',
     source: '中通客车控股股份有限公司',
     amount: 528000.00,
@@ -219,7 +267,7 @@ const incomeList = ref([
   },
   {
     id: 7,
-    code: 'SR202403200007',
+    code: 'SR202503200007',
     type: 'other',
     source: '配件销售收入',
     amount: 168000.00,
@@ -228,7 +276,7 @@ const incomeList = ref([
   },
   {
     id: 8,
-    code: 'SR202403200008',
+    code: 'SR202503200008',
     type: 'order',
     source: '山东魏桥创业集团有限公司',
     amount: 785000.00,
@@ -237,7 +285,7 @@ const incomeList = ref([
   },
   {
     id: 9,
-    code: 'SR202403200009',
+    code: 'SR202503200009',
     type: 'order',
     source: '山东晨鸣纸业集团股份有限公司',
     amount: 496000.00,
@@ -246,7 +294,7 @@ const incomeList = ref([
   },
   {
     id: 10,
-    code: 'SR202403200010',
+    code: 'SR202503200010',
     type: 'other',
     source: '培训服务收入',
     amount: 128000.00,
@@ -278,18 +326,37 @@ const getTypeText = (type: string) => {
 // 搜索
 const handleSearch = () => {
   query.value.page = 1;
-  loadIncomeList();
-};
-
-// 加载收入列表
-const loadIncomeList = () => {
-  // 这里应该调用API获取数据
-  console.log('加载收入列表:', query.value);
+  const { keyword, type, dateRange } = query.value;
+  
+  // 过滤数据
+  const filteredData = incomeList.value.filter(item => {
+    const matchKeyword = !keyword || 
+      item.code.includes(keyword) || 
+      item.source.includes(keyword);
+    
+    const matchType = !type || item.type === type;
+    
+    const matchDate = !dateRange || dateRange.length !== 2 || (
+      new Date(item.createTime) >= new Date(dateRange[0]) &&
+      new Date(item.createTime) <= new Date(dateRange[1])
+    );
+    
+    return matchKeyword && matchType && matchDate;
+  });
+  
+  // 更新总数
+  total.value = filteredData.length;
+  
+  // 更新当前页数据
+  const start = (query.value.page - 1) * query.value.pageSize;
+  const end = start + query.value.pageSize;
+  incomeList.value = filteredData.slice(start, end);
 };
 
 // 对话框状态
 const dialogs = reactive({
-  form: false
+  form: false,
+  view: false
 });
 
 // 表单类型
@@ -340,7 +407,45 @@ const handleEdit = (row: any) => {
   dialogs.form = true;
 };
 
-// 删除收入
+// 查看收入
+const handleView = (row: any) => {
+  viewData.value = row;
+  dialogs.view = true;
+};
+
+// 审核收入
+const handleApprove = (row: any) => {
+  ElMessageBox.confirm(
+    '确定要审核通过该收入记录吗？',
+    '提示',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    row.status = 'approved';
+    ElMessage.success('审核成功');
+  }).catch(() => {});
+};
+
+// 确认收款
+const handleComplete = (row: any) => {
+  ElMessageBox.confirm(
+    '确定要确认收款吗？',
+    '提示',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    row.status = 'completed';
+    ElMessage.success('确认收款成功');
+  }).catch(() => {});
+};
+
+// 修改删除收入函数
 const handleDelete = (row: any) => {
   ElMessageBox.confirm(
     '确定要删除该收入记录吗？',
@@ -351,22 +456,15 @@ const handleDelete = (row: any) => {
       type: 'warning'
     }
   ).then(() => {
-    console.log('删除收入:', row);
-    ElMessage.success('删除成功');
+    const index = incomeList.value.findIndex(item => item.id === row.id);
+    if (index > -1) {
+      incomeList.value.splice(index, 1);
+      ElMessage.success('删除成功');
+    }
   }).catch(() => {});
 };
 
-// 分页大小改变
-const handleSizeChange = () => {
-  loadIncomeList();
-};
-
-// 页码改变
-const handleCurrentChange = () => {
-  loadIncomeList();
-};
-
-// 提交表单
+// 修改提交表单函数
 const handleSubmit = async () => {
   if (!formRef.value) return;
   
@@ -389,17 +487,42 @@ const handleSubmit = async () => {
           id: incomeList.value.length + 1,
           code,
           ...form,
-          createTime
+          createTime,
+          status: 'pending'
         });
         ElMessage.success('添加成功');
       } else {
-        Object.assign(currentRow.value, form);
-        ElMessage.success('修改成功');
+        const index = incomeList.value.findIndex(item => item.id === currentRow.value.id);
+        if (index > -1) {
+          incomeList.value[index] = {
+            ...incomeList.value[index],
+            ...form,
+            status: 'pending' // 编辑后状态重置为待处理
+          };
+          ElMessage.success('修改成功');
+        }
       }
       dialogs.form = false;
     }
   });
 };
+
+// 修改分页函数
+const handleSizeChange = (val: number) => {
+  query.value.pageSize = val;
+  handleSearch();
+};
+
+const handleCurrentChange = (val: number) => {
+  query.value.page = val;
+  handleSearch();
+};
+
+// 添加查看数据对象
+const viewData = ref({});
+
+// 初始化加载
+handleSearch();
 </script>
 
 <style scoped lang="scss">
@@ -468,6 +591,36 @@ const handleSubmit = async () => {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 20px;
+  }
+
+  :deep(.operation-buttons) {
+    display: flex;
+    gap: 8px;
+    
+    a {
+      color: var(--el-color-primary);
+      cursor: pointer;
+      
+      &:hover {
+        color: var(--el-color-primary-light-3);
+      }
+      
+      &.danger {
+        color: var(--el-color-danger);
+        
+        &:hover {
+          color: var(--el-color-danger-light-3);
+        }
+      }
+      
+      &.success {
+        color: var(--el-color-success);
+        
+        &:hover {
+          color: var(--el-color-success-light-3);
+        }
+      }
+    }
   }
 }
 </style> 

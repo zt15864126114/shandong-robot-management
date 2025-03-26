@@ -12,7 +12,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
     "echarts": "^5.6.0",
-    "element-plus": "^2.3.0",
+    "element-plus": "^2.2.0",
     "pinia": "^2.1.0",
     "pinyin": "^4.0.0-alpha.2",
     "vue": "^3.3.0",

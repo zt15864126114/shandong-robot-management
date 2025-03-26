@@ -2,39 +2,51 @@
   <el-dialog
     title="订单详情"
     v-model="visible"
-    width="800px"
+    width="900px"
   >
-    <el-descriptions v-if="order" :column="2" border>
-      <el-descriptions-item label="订单编号">{{ order?.orderNo }}</el-descriptions-item>
-      <el-descriptions-item label="订单状态">
-        <el-tag :type="getStatusType(order?.status)">
-          {{ getStatusText(order?.status) }}
-        </el-tag>
-      </el-descriptions-item>
-      <el-descriptions-item label="客户名称">{{ order?.customer }}</el-descriptions-item>
-      <el-descriptions-item label="订单金额">¥{{ formatNumber(order?.amount) }}</el-descriptions-item>
-      <el-descriptions-item label="产品类型">{{ order?.productType }}</el-descriptions-item>
-      <el-descriptions-item label="产品型号">{{ order?.productModel }}</el-descriptions-item>
-      <el-descriptions-item label="创建时间">{{ order?.createTime }}</el-descriptions-item>
-      <el-descriptions-item label="交付时间">{{ order?.deliveryTime }}</el-descriptions-item>
-      <el-descriptions-item label="备注" :span="2">
-        {{ order?.remark || '暂无备注' }}
-      </el-descriptions-item>
-    </el-descriptions>
+    <el-tabs v-model="activeTab">
+      <el-tab-pane label="基本信息" name="basic">
+        <el-descriptions v-if="order" :column="2" border>
+          <el-descriptions-item label="订单编号">{{ order?.orderNo }}</el-descriptions-item>
+          <el-descriptions-item label="订单状态">
+            <el-tag :type="getStatusType(order?.status)">
+              {{ getStatusText(order?.status) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="客户名称">{{ order?.customer }}</el-descriptions-item>
+          <el-descriptions-item label="订单金额">¥{{ formatNumber(order?.amount) }}</el-descriptions-item>
+          <el-descriptions-item label="产品类型">{{ order?.productType }}</el-descriptions-item>
+          <el-descriptions-item label="产品型号">{{ order?.productModel }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ order?.createTime }}</el-descriptions-item>
+          <el-descriptions-item label="交付时间">{{ order?.deliveryTime }}</el-descriptions-item>
+          <el-descriptions-item label="备注" :span="2">
+            {{ order?.remark || '暂无备注' }}
+          </el-descriptions-item>
+        </el-descriptions>
 
-    <div class="timeline-section">
-      <h3>订单进度</h3>
-      <el-timeline>
-        <el-timeline-item
-          v-for="(activity, index) in orderTimeline"
-          :key="index"
-          :type="activity.type"
-          :timestamp="activity.timestamp"
-        >
-          {{ activity.content }}
-        </el-timeline-item>
-      </el-timeline>
-    </div>
+        <div class="timeline-section">
+          <h3>订单进度</h3>
+          <el-timeline>
+            <el-timeline-item
+              v-for="(activity, index) in orderTimeline"
+              :key="index"
+              :type="activity.type"
+              :timestamp="activity.timestamp"
+            >
+              {{ activity.content }}
+            </el-timeline-item>
+          </el-timeline>
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="物流跟踪" name="logistics">
+        <logistics-tracking :order="order" @success="handleSuccess" />
+      </el-tab-pane>
+
+      <el-tab-pane label="售后服务" name="afterSale">
+        <after-sale :order="order" @success="handleSuccess" />
+      </el-tab-pane>
+    </el-tabs>
 
     <template #footer>
       <span class="dialog-footer">
@@ -66,9 +78,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import type { Order, OrderStatus } from '@/types/order';
+import LogisticsTracking from './logistics-tracking.vue';
+import AfterSale from './after-sale.vue';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -81,6 +95,8 @@ const visible = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
 });
+
+const activeTab = ref('basic');
 
 // 获取订单状态样式
 const getStatusType = (status?: OrderStatus) => {
@@ -212,6 +228,11 @@ const handleComplete = () => {
     visible.value = false;
   });
 };
+
+// 操作成功回调
+const handleSuccess = () => {
+  emit('success');
+};
 </script>
 
 <style scoped lang="scss">
@@ -227,5 +248,9 @@ const handleComplete = () => {
 
 :deep(.el-descriptions) {
   margin: 20px 0;
+}
+
+:deep(.el-tabs__content) {
+  padding: 20px 0;
 }
 </style> 

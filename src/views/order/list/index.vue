@@ -110,16 +110,26 @@
           </el-table-column>
           <el-table-column prop="createTime" label="创建时间" width="180" />
           <el-table-column prop="deliveryTime" label="交付时间" width="180" />
-          <el-table-column label="操作" width="200" fixed="right">
+          <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="handleView(row)">查看</el-button>
-              <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-              <el-button 
-                link 
-                type="danger" 
-                @click="handleCancel(row)"
-                v-if="row.status === 'unpaid'"
-              >取消</el-button>
+              <div class="operation-buttons">
+                <template v-if="row.status === 'unpaid'">
+                  <a @click="handleEdit(row)">编辑</a>
+                  <a class="danger" @click="handleCancel(row)">删除</a>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+                <template v-else-if="row.status === 'unshipped'">
+                  <a @click="handleShip(row)">发货</a>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+                <template v-else-if="row.status === 'shipped'">
+                  <a class="success" @click="handleComplete(row)">完成</a>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+                <template v-else>
+                  <a @click="handleView(row)">查看</a>
+                </template>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -233,6 +243,58 @@ const generateTestData = () => {
     }
   ];
 
+  // 物流公司列表
+  const carriers = ['顺丰速运', '德邦物流', '中通快递', '圆通速递', '韵达快递'];
+
+  // 生成物流信息
+  const generateLogisticsInfo = (status: OrderStatus, createDate: Date) => {
+    if (status === 'unpaid' || status === 'unshipped') return undefined;
+
+    const logisticsStatus: LogisticsStatus = status === 'shipped' ? 'in_transit' : 'delivered';
+    const trackingNumber = `SF${String(Math.floor(Math.random() * 1000000000)).padStart(9, '0')}`;
+    const carrier = carriers[Math.floor(Math.random() * carriers.length)];
+    const pickupTime = new Date(createDate.getTime() + 24 * 60 * 60 * 1000);
+    const deliveryTime = new Date(createDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+    const currentLocation = logisticsStatus === 'delivered' ? '已送达' : '济南市历下区';
+
+    // 生成物流轨迹
+    const trackingHistory = [
+      {
+        time: createDate.toISOString().replace('T', ' ').substring(0, 19),
+        location: '济南市历下区',
+        status: '订单已创建'
+      },
+      {
+        time: pickupTime.toISOString().replace('T', ' ').substring(0, 19),
+        location: '济南市历下区',
+        status: '已取件'
+      },
+      {
+        time: new Date(createDate.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
+        location: '济南市历下区',
+        status: '运输中'
+      }
+    ];
+
+    if (logisticsStatus === 'delivered') {
+      trackingHistory.push({
+        time: deliveryTime.toISOString().replace('T', ' ').substring(0, 19),
+        location: '已送达',
+        status: '已送达'
+      });
+    }
+
+    return {
+      status: logisticsStatus,
+      trackingNumber,
+      carrier,
+      pickupTime: pickupTime.toISOString().replace('T', ' ').substring(0, 19),
+      deliveryTime: deliveryTime.toISOString().replace('T', ' ').substring(0, 19),
+      currentLocation,
+      trackingHistory
+    };
+  };
+
   for (let i = 1; i <= 100; i++) {
     // 随机选择产品类型和型号
     const productType = products[Math.floor(Math.random() * products.length)];
@@ -247,6 +309,12 @@ const generateTestData = () => {
     // 生成订单号：年月日 + 4位序号
     const orderNo = `ORD${createDate.getFullYear()}${String(createDate.getMonth() + 1).padStart(2, '0')}${String(createDate.getDate()).padStart(2, '0')}${String(i).padStart(4, '0')}`;
     
+    // 随机选择状态
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    
+    // 生成物流信息
+    const logistics = generateLogisticsInfo(status, createDate);
+    
     data.push({
       id: i,
       orderNo,
@@ -254,13 +322,26 @@ const generateTestData = () => {
       productType: productType.type,
       productModel,
       amount,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
+      status,
       createTime: createDate.toISOString().replace('T', ' ').substring(0, 19),
       updateTime: createDate.toISOString().replace('T', ' ').substring(0, 19),
       payTime: status !== 'unpaid' ? new Date(createDate.getTime() + 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19) : null,
       shipTime: ['shipped', 'completed'].includes(status) ? new Date(createDate.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19) : null,
       completeTime: status === 'completed' ? new Date(createDate.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19) : null,
-      deliveryTime: new Date(createDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      deliveryTime: new Date(createDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      logistics,
+      customerContact: {
+        name: '张三',
+        phone: '13800138000',
+        email: 'zhangsan@example.com',
+        address: '山东省济南市历下区'
+      },
+      paymentInfo: {
+        method: '银行转账',
+        transactionId: `TR${String(Math.floor(Math.random() * 1000000000)).padStart(9, '0')}`,
+        paidAmount: amount,
+        paidTime: status !== 'unpaid' ? new Date(createDate.getTime() + 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19) : undefined
+      }
     });
   }
 
@@ -484,6 +565,36 @@ loadOrderList();
     display: flex;
     justify-content: flex-end;
     margin-top: 20px;
+  }
+
+  :deep(.operation-buttons) {
+    display: flex;
+    gap: 8px;
+    
+    a {
+      color: var(--el-color-primary);
+      cursor: pointer;
+      
+      &:hover {
+        color: var(--el-color-primary-light-3);
+      }
+      
+      &.danger {
+        color: var(--el-color-danger);
+        
+        &:hover {
+          color: var(--el-color-danger-light-3);
+        }
+      }
+      
+      &.success {
+        color: var(--el-color-success);
+        
+        &:hover {
+          color: var(--el-color-success-light-3);
+        }
+      }
+    }
   }
 }
 </style> 

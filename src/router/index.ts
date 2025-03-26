@@ -81,6 +81,14 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: '采购管理'
             }
+          },
+          {
+            path: 'logistics',
+            name: 'Logistics',
+            component: () => import('@/views/supply/logistics/index.vue'),
+            meta: {
+              title: '物流管理'
+            }
           }
         ]
       },
@@ -115,7 +123,49 @@ const routes: RouteRecordRaw[] = [
             meta: {
               title: '财务报表'
             }
-          }
+          },
+          {
+            path: 'invoice',
+            name: 'Invoice',
+            component: () => import('@/views/finance/invoice/index.vue'),
+            meta: {
+              title: '发票管理'
+            }
+          },
+          {
+            path: 'reimbursement',
+            name: 'Reimbursement',
+            component: () => import('@/views/finance/reimbursement/index.vue'),
+            meta: {
+              title: '报销管理'
+            }
+          },
+          {
+            path: 'payment',
+            name: 'Payment',
+            redirect: '/finance/payment/list',
+            meta: {
+              title: '支付管理'
+            },
+            children: [
+              {
+                path: 'list',
+                name: 'PaymentList',
+                component: () => import('@/views/finance/payment/index.vue'),
+                meta: {
+                  title: '支付记录'
+                }
+              },
+              {
+                path: 'config',
+                name: 'PaymentConfig',
+                component: () => import('@/views/finance/payment/config.vue'),
+                meta: {
+                  title: '支付配置'
+                }
+              }
+            ]
+          },
         ]
       },
       {
@@ -140,6 +190,24 @@ const routes: RouteRecordRaw[] = [
             component: () => import('@/views/customer/service/index.vue'),
             meta: {
               title: '客户服务'
+            }
+          }
+        ]
+      },
+      {
+        path: 'marketing',
+        name: 'Marketing',
+        redirect: '/marketing/promotion',
+        meta: {
+          title: '营销管理'
+        },
+        children: [
+          {
+            path: 'promotion',
+            name: 'Promotion',
+            component: () => import('@/views/marketing/promotion/index.vue'),
+            meta: {
+              title: '营销推广'
             }
           }
         ]

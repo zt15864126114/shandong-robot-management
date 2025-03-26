@@ -6,7 +6,8 @@ import {
   DataLine,
   Monitor,
   OfficeBuilding,
-  Present
+  Present,
+  Promotion
 } from '@element-plus/icons-vue';
 
 export const menuConfig = [
@@ -47,6 +48,10 @@ export const menuConfig = [
       {
         title: '采购管理',
         path: 'purchase'
+      },
+      {
+        title: '物流管理',
+        path: 'logistics'
       }
     ]
   },
@@ -66,6 +71,28 @@ export const menuConfig = [
       {
         title: '财务报表',
         path: 'statement'
+      },
+      {
+        title: '发票管理',
+        path: 'invoice'
+      },
+      {
+        title: '报销管理',
+        path: 'reimbursement'
+      },
+      {
+        title: '支付管理',
+        path: 'payment',
+        children: [
+          {
+            title: '支付记录',
+            path: 'list'
+          },
+          {
+            title: '支付配置',
+            path: 'config'
+          }
+        ]
       }
     ]
   },
@@ -81,6 +108,17 @@ export const menuConfig = [
       {
         title: '客户服务',
         path: 'service'
+      }
+    ]
+  },
+  {
+    title: '营销管理',
+    icon: Promotion,
+    path: 'marketing',
+    children: [
+      {
+        title: '营销推广',
+        path: 'promotion'
       }
     ]
   },

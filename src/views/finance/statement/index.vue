@@ -166,7 +166,7 @@ const statementList = ref([
     remark: '月初订单交付'
   },
   {
-    date: '2024-02',
+    date: '2025-02',
     income: 3685000.00,
     expense: 2235600.00,
     profit: 1449400.00,
@@ -174,7 +174,7 @@ const statementList = ref([
     remark: '春节期间开支减少'
   },
   {
-    date: '2024-02-W4',
+    date: '2025-02-W4',
     income: 986000.00,
     expense: 586000.00,
     profit: 400000.00,
@@ -182,7 +182,7 @@ const statementList = ref([
     remark: '春节后订单恢复'
   },
   {
-    date: '2024-02-W3',
+    date: '2025-02-W3',
     income: 856000.00,
     expense: 485000.00,
     profit: 371000.00,
@@ -190,7 +190,7 @@ const statementList = ref([
     remark: '春节期间固定支出减少'
   },
   {
-    date: '2024-02-W2',
+    date: '2025-02-W2',
     income: 968000.00,
     expense: 586000.00,
     profit: 382000.00,
@@ -198,7 +198,7 @@ const statementList = ref([
     remark: '春节前集中交付'
   },
   {
-    date: '2024-02-W1',
+    date: '2025-02-W1',
     income: 875000.00,
     expense: 578600.00,
     profit: 296400.00,
@@ -206,7 +206,7 @@ const statementList = ref([
     remark: '月初正常经营'
   },
   {
-    date: '2024-01',
+    date: '2025-01',
     income: 3268000.00,
     expense: 2568000.00,
     profit: 700000.00,
@@ -214,7 +214,7 @@ const statementList = ref([
     remark: '年初开支较大'
   },
   {
-    date: '2024-01-W4',
+    date: '2025-01-W4',
     income: 856000.00,
     expense: 685000.00,
     profit: 171000.00,
@@ -222,7 +222,7 @@ const statementList = ref([
     remark: '月末设备采购'
   },
   {
-    date: '2024-01-W3',
+    date: '2025-01-W3',
     income: 785000.00,
     expense: 625000.00,
     profit: 160000.00,
@@ -230,7 +230,7 @@ const statementList = ref([
     remark: '研发投入增加'
   },
   {
-    date: '2024-01-W2',
+    date: '2025-01-W2',
     income: 868000.00,
     expense: 658000.00,
     profit: 210000.00,
@@ -238,7 +238,7 @@ const statementList = ref([
     remark: '新项目启动'
   },
   {
-    date: '2024-01-W1',
+    date: '2025-01-W1',
     income: 759000.00,
     expense: 600000.00,
     profit: 159000.00,

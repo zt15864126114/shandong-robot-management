@@ -108,14 +108,14 @@ const certificates = ref([
     name: '软件企业认定证书',
     number: 'R-2021-0123',
     issueDate: '2022-01-01',
-    expireDate: '2024-12-31',
+    expireDate: '2025-12-31',
     status: 'warning'
   },
   {
     name: '进出口经营资质证书',
     number: 'IE-2020-0456',
     issueDate: '2021-07-01',
-    expireDate: '2024-06-30',
+    expireDate: '2025-06-30',
     status: 'warning'
   },
   {

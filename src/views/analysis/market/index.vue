@@ -302,7 +302,7 @@ const dataList = ref([
     remark: '市场份额持续增长'
   },
   {
-    date: '2024-02',
+    date: '2025-02',
     marketShare: 23.5,
     newCustomers: 156,
     lostCustomers: -21,
@@ -310,7 +310,7 @@ const dataList = ref([
     remark: '客户满意度提升'
   },
   {
-    date: '2024-01',
+    date: '2025-01',
     marketShare: 23.5,
     newCustomers: 156,
     lostCustomers: -23,

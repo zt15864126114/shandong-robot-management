@@ -93,8 +93,8 @@ const loadOrderDetail = () => {
     customerName: '测试客户',
     amount: 599.97,
     status: 'processing',
-    createTime: '2024-02-26 18:51:19',
-    updateTime: '2024-02-26 18:51:19',
+    createTime: '2025-02-26 18:51:19',
+    updateTime: '2025-02-26 18:51:19',
     products: [
       {
         id: 1,

@@ -38,25 +38,25 @@
           <el-col :span="6">
             <el-card shadow="hover" class="data-card">
               <h3>待处理</h3>
-              <div class="number warning">12</div>
+              <div class="number warning">{{ stats.pending }}</div>
             </el-card>
           </el-col>
           <el-col :span="6">
             <el-card shadow="hover" class="data-card">
               <h3>处理中</h3>
-              <div class="number primary">24</div>
+              <div class="number primary">{{ stats.processing }}</div>
             </el-card>
           </el-col>
           <el-col :span="6">
             <el-card shadow="hover" class="data-card">
               <h3>已完成</h3>
-              <div class="number success">89</div>
+              <div class="number success">{{ stats.completed }}</div>
             </el-card>
           </el-col>
           <el-col :span="6">
             <el-card shadow="hover" class="data-card">
               <h3>已关闭</h3>
-              <div class="number info">45</div>
+              <div class="number info">{{ stats.closed }}</div>
             </el-card>
           </el-col>
         </el-row>
@@ -82,23 +82,22 @@
           <el-table-column prop="createTime" label="创建时间" width="180" />
           <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button 
-                v-if="row.status !== 'completed' && row.status !== 'closed'"
-                link 
-                type="primary" 
-                @click="handleProcess(row)"
-              >
-                处理
-              </el-button>
-              <el-button link type="primary" @click="handleView(row)">查看</el-button>
-              <el-button 
-                v-if="row.status === 'pending'"
-                link 
-                type="danger" 
-                @click="handleClose(row)"
-              >
-                关闭
-              </el-button>
+              <div class="operation-buttons">
+                <a 
+                  v-if="row.status !== 'completed' && row.status !== 'closed'"
+                  @click="handleProcess(row)"
+                >
+                  处理
+                </a>
+                <a @click="handleView(row)">查看</a>
+                <a 
+                  v-if="row.status === 'pending'"
+                  class="danger"
+                  @click="handleClose(row)"
+                >
+                  关闭
+                </a>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -173,8 +172,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogs.form = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button text @click="dialogs.form = false">取消</el-button>
+        <el-button text type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
 
@@ -201,7 +200,7 @@
         </el-descriptions-item>
       </el-descriptions>
       <template #footer>
-        <el-button @click="dialogs.view = false">关闭</el-button>
+        <el-button text @click="dialogs.view = false">关闭</el-button>
       </template>
     </el-dialog>
   </div>
@@ -239,7 +238,7 @@ const query = ref({
 const serviceList = ref([
   {
     id: 1,
-    code: 'GD202403200001',
+    code: 'GD202503200001',
     customer: '山东临工工程机械有限公司',
     type: 'complaint',
     status: 'pending',
@@ -248,7 +247,7 @@ const serviceList = ref([
   },
   {
     id: 2,
-    code: 'GD202403200002',
+    code: 'GD202503200002',
     customer: '青岛海尔生物医疗股份有限公司',
     type: 'consult',
     status: 'processing',
@@ -257,7 +256,7 @@ const serviceList = ref([
   },
   {
     id: 3,
-    code: 'GD202403200003',
+    code: 'GD202503200003',
     customer: '山东新华医疗器械股份有限公司',
     type: 'suggestion',
     status: 'completed',
@@ -266,7 +265,7 @@ const serviceList = ref([
   },
   {
     id: 4,
-    code: 'GD202403200004',
+    code: 'GD202503200004',
     customer: '浪潮电子信息产业股份有限公司',
     type: 'complaint',
     status: 'processing',
@@ -275,7 +274,7 @@ const serviceList = ref([
   },
   {
     id: 5,
-    code: 'GD202403200005',
+    code: 'GD202503200005',
     customer: '中通客车控股股份有限公司',
     type: 'consult',
     status: 'pending',
@@ -284,7 +283,7 @@ const serviceList = ref([
   },
   {
     id: 6,
-    code: 'GD202403200006',
+    code: 'GD202503200006',
     customer: '山东魏桥创业集团有限公司',
     type: 'complaint',
     status: 'completed',
@@ -307,7 +306,7 @@ const serviceList = ref([
   },
   {
     id: 7,
-    code: 'GD202403200007',
+    code: 'GD202503200007',
     customer: '山东晨鸣纸业集团股份有限公司',
     type: 'suggestion',
     status: 'processing',
@@ -326,7 +325,7 @@ const serviceList = ref([
   },
   {
     id: 8,
-    code: 'GD202403200008',
+    code: 'GD202503200008',
     customer: '山东东宏管业股份有限公司',
     type: 'consult',
     status: 'closed',
@@ -345,7 +344,7 @@ const serviceList = ref([
   },
   {
     id: 9,
-    code: 'GD202403200009',
+    code: 'GD202503200009',
     customer: '山东临工工程机械有限公司',
     type: 'complaint',
     status: 'processing',
@@ -364,7 +363,7 @@ const serviceList = ref([
   },
   {
     id: 10,
-    code: 'GD202403200010',
+    code: 'GD202503200010',
     customer: '青岛海尔生物医疗股份有限公司',
     type: 'suggestion',
     status: 'pending',
@@ -373,7 +372,7 @@ const serviceList = ref([
   },
   {
     id: 11,
-    code: 'GD202403200011',
+    code: 'GD202503200011',
     customer: '浪潮电子信息产业股份有限公司',
     type: 'consult',
     status: 'completed',
@@ -396,7 +395,7 @@ const serviceList = ref([
   },
   {
     id: 12,
-    code: 'GD202403200012',
+    code: 'GD202503200012',
     customer: '中通客车控股股份有限公司',
     type: 'complaint',
     status: 'pending',
@@ -703,6 +702,36 @@ const handleSubmit = async () => {
 
     .content {
       color: #666;
+    }
+  }
+
+  .operation-buttons {
+    display: flex;
+    gap: 8px;
+    
+    a {
+      color: var(--el-color-primary);
+      cursor: pointer;
+      
+      &:hover {
+        color: var(--el-color-primary-light-3);
+      }
+      
+      &.danger {
+        color: var(--el-color-danger);
+        
+        &:hover {
+          color: var(--el-color-danger-light-3);
+        }
+      }
+      
+      &.success {
+        color: var(--el-color-success);
+        
+        &:hover {
+          color: var(--el-color-success-light-3);
+        }
+      }
     }
   }
 }
