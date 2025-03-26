@@ -59,14 +59,11 @@
           </el-table-column>
           <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="handleView(row)">查看</el-button>
-              <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-              <el-button 
-                link 
-                type="danger" 
-                @click="handleDelete(row)"
-                v-if="row.status === 'active'"
-              >离职</el-button>
+              <div class="operation-buttons">
+                <a @click="handleView(row)">查看</a>
+                <a @click="handleEdit(row)">编辑</a>
+                <a class="danger" @click="handleDelete(row)" v-if="row.status === 'active'">删除</a>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -235,11 +232,11 @@ const employeeList = ref([
   {
     id: 1,
     employeeNo: 'EMP001',
-    name: '王志远',
+    name: '王德明',
     department: '总经理办公室',
     position: '总经理',
     phone: '13900139000',
-    email: 'wangzy@shandong-robot.com',
+    email: 'wangdm@shandong-robot.com',
     joinTime: '2023-01-01',
     status: 'active',
     idCard: '370100198001011234',
@@ -253,11 +250,11 @@ const employeeList = ref([
   {
     id: 2,
     employeeNo: 'EMP002',
-    name: '李明',
+    name: '李建国',
     department: '研发中心',
     position: '总监',
     phone: '13900139001',
-    email: 'liming@shandong-robot.com',
+    email: 'lijg@shandong-robot.com',
     joinTime: '2023-02-01',
     status: 'active',
     idCard: '370100198203121234',
@@ -265,17 +262,17 @@ const employeeList = ref([
     education: '硕士',
     major: '机器人工程',
     address: '济南市高新区',
-    emergencyContact: '李先生',
+    emergencyContact: '李女士',
     emergencyPhone: '13922222222'
   },
   {
     id: 3,
     employeeNo: 'EMP003',
-    name: '张工',
+    name: '张伟',
     department: '机器人研发部',
     position: '主管',
     phone: '13900139002',
-    email: 'zhang@shandong-robot.com',
+    email: 'zhangw@shandong-robot.com',
     joinTime: '2023-03-15',
     status: 'active',
     idCard: '370100198505151234',
@@ -289,11 +286,11 @@ const employeeList = ref([
   {
     id: 4,
     employeeNo: 'EMP004',
-    name: '刘芳',
+    name: '刘丽',
     department: '软件开发部',
     position: '主管',
     phone: '13900139003',
-    email: 'liuf@shandong-robot.com',
+    email: 'liul@shandong-robot.com',
     joinTime: '2023-04-01',
     status: 'active',
     idCard: '370100198707071234',
@@ -325,11 +322,11 @@ const employeeList = ref([
   {
     id: 6,
     employeeNo: 'EMP006',
-    name: '吴工',
+    name: '吴建华',
     department: '质量部',
     position: '主管',
     phone: '13900139005',
-    email: 'wu@shandong-robot.com',
+    email: 'wujh@shandong-robot.com',
     joinTime: '2023-05-01',
     status: 'active',
     idCard: '370100198606061234',
@@ -343,11 +340,11 @@ const employeeList = ref([
   {
     id: 7,
     employeeNo: 'EMP007',
-    name: '赵工',
+    name: '赵明',
     department: '机器人研发部',
     position: '工程师',
     phone: '13900139006',
-    email: 'zhao@shandong-robot.com',
+    email: 'zhaom@shandong-robot.com',
     joinTime: '2023-07-01',
     status: 'probation',
     idCard: '370100199001011234',
@@ -361,11 +358,11 @@ const employeeList = ref([
   {
     id: 8,
     employeeNo: 'EMP008',
-    name: '孙工',
+    name: '孙华',
     department: '软件开发部',
     position: '工程师',
     phone: '13900139007',
-    email: 'sun@shandong-robot.com',
+    email: 'sunh@shandong-robot.com',
     joinTime: '2023-06-15',
     status: 'resigned',
     idCard: '370100199202021234',
@@ -379,11 +376,11 @@ const employeeList = ref([
   {
     id: 9,
     employeeNo: 'EMP009',
-    name: '陈工',
+    name: '陈静',
     department: '机器人研发部',
     position: '工程师',
     phone: '13900139008',
-    email: 'chen@shandong-robot.com',
+    email: 'chenj@shandong-robot.com',
     joinTime: '2023-08-01',
     status: 'probation',
     idCard: '370100199303031234',
@@ -397,11 +394,11 @@ const employeeList = ref([
   {
     id: 10,
     employeeNo: 'EMP010',
-    name: '郭工',
+    name: '郭勇',
     department: '软件开发部',
     position: '工程师',
     phone: '13900139009',
-    email: 'guo@shandong-robot.com',
+    email: 'guoy@shandong-robot.com',
     joinTime: '2023-08-15',
     status: 'probation',
     idCard: '370100199404041234',
@@ -415,11 +412,11 @@ const employeeList = ref([
   {
     id: 11,
     employeeNo: 'EMP011',
-    name: '杨工',
+    name: '杨帆',
     department: '生产部',
     position: '主管',
     phone: '13900139010',
-    email: 'yang@shandong-robot.com',
+    email: 'yangf@shandong-robot.com',
     joinTime: '2023-03-01',
     status: 'active',
     idCard: '370100198808081234',
@@ -433,11 +430,11 @@ const employeeList = ref([
   {
     id: 12,
     employeeNo: 'EMP012',
-    name: '马工',
+    name: '马超',
     department: '质量部',
     position: '工程师',
     phone: '13900139011',
-    email: 'ma@shandong-robot.com',
+    email: 'mac@shandong-robot.com',
     joinTime: '2023-04-01',
     status: 'active',
     idCard: '370100199505051234',
@@ -451,11 +448,11 @@ const employeeList = ref([
   {
     id: 13,
     employeeNo: 'EMP013',
-    name: '韩工',
+    name: '韩雪',
     department: '机器人研发部',
     position: '工程师',
     phone: '13900139012',
-    email: 'han@shandong-robot.com',
+    email: 'hanx@shandong-robot.com',
     joinTime: '2023-05-15',
     status: 'active',
     idCard: '370100199606061234',
@@ -469,11 +466,11 @@ const employeeList = ref([
   {
     id: 14,
     employeeNo: 'EMP014',
-    name: '朱工',
+    name: '朱峰',
     department: '软件开发部',
     position: '工程师',
     phone: '13900139013',
-    email: 'zhu@shandong-robot.com',
+    email: 'zhuf@shandong-robot.com',
     joinTime: '2023-06-01',
     status: 'active',
     idCard: '370100199707071234',
@@ -487,11 +484,11 @@ const employeeList = ref([
   {
     id: 15,
     employeeNo: 'EMP015',
-    name: '秦工',
+    name: '秦阳',
     department: '生产部',
     position: '工程师',
     phone: '13900139014',
-    email: 'qin@shandong-robot.com',
+    email: 'qiny@shandong-robot.com',
     joinTime: '2023-07-01',
     status: 'active',
     idCard: '370100199808081234',
@@ -505,11 +502,11 @@ const employeeList = ref([
   {
     id: 16,
     employeeNo: 'EMP016',
-    name: '许工',
+    name: '许婷',
     department: '质量部',
     position: '工程师',
     phone: '13900139015',
-    email: 'xu@shandong-robot.com',
+    email: 'xut@shandong-robot.com',
     joinTime: '2023-07-15',
     status: 'active',
     idCard: '370100199909091234',
@@ -523,11 +520,11 @@ const employeeList = ref([
   {
     id: 17,
     employeeNo: 'EMP017',
-    name: '何工',
+    name: '何亮',
     department: '机器人研发部',
     position: '工程师',
     phone: '13900139016',
-    email: 'he@shandong-robot.com',
+    email: 'hel@shandong-robot.com',
     joinTime: '2023-08-01',
     status: 'probation',
     idCard: '370100199010101234',
@@ -541,11 +538,11 @@ const employeeList = ref([
   {
     id: 18,
     employeeNo: 'EMP018',
-    name: '曹工',
+    name: '曹云',
     department: '软件开发部',
     position: '工程师',
     phone: '13900139017',
-    email: 'cao@shandong-robot.com',
+    email: 'caoy@shandong-robot.com',
     joinTime: '2023-08-15',
     status: 'probation',
     idCard: '370100199111111234',
@@ -628,7 +625,7 @@ const handleAdd = () => {
 // 员工离职
 const handleDelete = (row: any) => {
   ElMessageBox.confirm(
-    `确认将员工"${row.name}"设置为离职状态吗？`,
+    `确认删除该员工吗？`,
     '提示',
     {
       confirmButtonText: '确定',
@@ -636,7 +633,7 @@ const handleDelete = (row: any) => {
       type: 'warning'
     }
   ).then(() => {
-    ElMessage.success('操作成功');
+    ElMessage.success('删除成功');
   });
 };
 
@@ -691,6 +688,29 @@ const handleCurrentChange = (page: number) => {
     display: flex;
     justify-content: flex-end;
     margin-top: 20px;
+  }
+
+  .operation-buttons {
+    display: flex;
+    gap: 12px;
+    
+    a {
+      color: var(--el-color-primary);
+      cursor: pointer;
+      text-decoration: none;
+      
+      &:hover {
+        color: var(--el-color-primary-light-3);
+      }
+      
+      &.danger {
+        color: var(--el-color-danger);
+        
+        &:hover {
+          color: var(--el-color-danger-light-3);
+        }
+      }
+    }
   }
 }
 </style> 
