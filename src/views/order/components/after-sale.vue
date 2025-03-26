@@ -244,38 +244,43 @@ const handleSubmit = async () => {
 const logisticsList = ref([
   {
     time: '2024-02-20 14:30',
-    location: '济宁市汶上县中都街道',
+    location: '济宁市汶上县中都街道中都广场',
     status: '已签收',
     operator: '张师傅',
-    phone: '13953712345'
+    phone: '13953712345',
+    remark: '客户本人签收'
   },
   {
     time: '2024-02-20 09:15',
-    location: '济宁市汶上县中都街道',
+    location: '济宁市汶上县中都街道中都广场',
     status: '派送中',
     operator: '张师傅',
-    phone: '13953712345'
+    phone: '13953712345',
+    remark: '正在派送，预计10:30送达'
   },
   {
     time: '2024-02-20 08:30',
-    location: '济宁市汶上县中都街道',
+    location: '济宁市汶上县中都街道中都广场',
     status: '已到达',
     operator: '张师傅',
-    phone: '13953712345'
+    phone: '13953712345',
+    remark: '已到达中都广场配送点'
   },
   {
     time: '2024-02-19 16:45',
-    location: '济宁市汶上县中都街道',
+    location: '济宁市汶上县中都街道中都广场',
     status: '运输中',
     operator: '李师傅',
-    phone: '13953767890'
+    phone: '13953767890',
+    remark: '从汶上县中都街道中都广场发出'
   },
   {
     time: '2024-02-19 14:20',
-    location: '济宁市汶上县中都街道',
+    location: '济宁市汶上县中都街道中都广场',
     status: '已发货',
     operator: '王师傅',
-    phone: '13953723456'
+    phone: '13953723456',
+    remark: '已打包完成，准备发货'
   }
 ]);
 </script>

@@ -244,42 +244,81 @@ const generateTestData = () => {
   ];
 
   // 物流公司列表
-  const carriers = ['顺丰速运', '德邦物流', '中通快递', '圆通速递', '韵达快递'];
+  const carriers = ['汶上县中都物流', '汶上县中都快递', '汶上县中都速运'];
+
+  // 客户地址列表
+  const customerAddresses = {
+    '山东重工': '济南市历城区工业北路',
+    '青岛港': '青岛市黄岛区港润路',
+    '济南医院': '济南市槐荫区经十路',
+    '潍柴动力': '潍坊市奎文区民生东街',
+    '浪潮集团': '济南市高新区浪潮路',
+    '海尔集团': '青岛市崂山区海尔路',
+    '中国重汽': '济南市历城区黄河路',
+    '山东钢铁': '济南市历下区工业南路',
+    '齐鲁制药': '济南市高新区新泺大街',
+    '东营石化': '东营市东营区济南路'
+  };
 
   // 生成物流信息
-  const generateLogisticsInfo = (status: OrderStatus, createDate: Date) => {
+  const generateLogisticsInfo = (status: OrderStatus, createDate: Date, customerAddress: string) => {
     if (status === 'unpaid' || status === 'unshipped') return undefined;
 
     const logisticsStatus: LogisticsStatus = status === 'shipped' ? 'in_transit' : 'delivered';
-    const trackingNumber = `SF${String(Math.floor(Math.random() * 1000000000)).padStart(9, '0')}`;
+    const trackingNumber = `WS${String(Math.floor(Math.random() * 1000000000)).padStart(9, '0')}`;
     const carrier = carriers[Math.floor(Math.random() * carriers.length)];
     const pickupTime = new Date(createDate.getTime() + 24 * 60 * 60 * 1000);
     const deliveryTime = new Date(createDate.getTime() + 3 * 24 * 60 * 60 * 1000);
-    const currentLocation = logisticsStatus === 'delivered' ? '已送达' : '济南市历下区';
+    const currentLocation = logisticsStatus === 'delivered' ? customerAddress : '济宁市汶上县中都街道';
 
     // 生成物流轨迹
     const trackingHistory = [
       {
         time: createDate.toISOString().replace('T', ' ').substring(0, 19),
-        location: '济南市历下区',
+        location: '济宁市汶上县中都街道中都广场',
         status: '订单已创建'
       },
       {
         time: pickupTime.toISOString().replace('T', ' ').substring(0, 19),
-        location: '济南市历下区',
+        location: '济宁市汶上县中都街道中都广场',
         status: '已取件'
       },
       {
-        time: new Date(createDate.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
-        location: '济南市历下区',
+        time: new Date(createDate.getTime() + 1.5 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
+        location: '济宁市汶上县经济开发区',
+        status: '已到达汶上县经济开发区分拣中心'
+      },
+      {
+        time: new Date(createDate.getTime() + 1.8 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
+        location: '济宁市汶上县苏海路',
         status: '运输中'
+      },
+      {
+        time: new Date(createDate.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
+        location: '济宁市汶上县广场东街',
+        status: '已到达汶上县城区配送站'
+      },
+      {
+        time: new Date(createDate.getTime() + 2.2 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
+        location: '济宁市汶上县康驿路',
+        status: '运输中'
+      },
+      {
+        time: new Date(createDate.getTime() + 2.5 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
+        location: '济宁市汶上县圣泽大街',
+        status: '运输中'
+      },
+      {
+        time: new Date(createDate.getTime() + 2.8 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
+        location: customerAddress,
+        status: '即将送达'
       }
     ];
 
     if (logisticsStatus === 'delivered') {
       trackingHistory.push({
         time: deliveryTime.toISOString().replace('T', ' ').substring(0, 19),
-        location: '已送达',
+        location: customerAddress,
         status: '已送达'
       });
     }
@@ -312,13 +351,17 @@ const generateTestData = () => {
     // 随机选择状态
     const status = statuses[Math.floor(Math.random() * statuses.length)];
     
+    // 随机选择客户
+    const customer = customers[Math.floor(Math.random() * customers.length)];
+    const customerAddress = customerAddresses[customer];
+    
     // 生成物流信息
-    const logistics = generateLogisticsInfo(status, createDate);
+    const logistics = generateLogisticsInfo(status, createDate, customerAddress);
     
     data.push({
       id: i,
       orderNo,
-      customer: customers[Math.floor(Math.random() * customers.length)],
+      customer,
       productType: productType.type,
       productModel,
       amount,
@@ -334,7 +377,7 @@ const generateTestData = () => {
         name: '张三',
         phone: '13800138000',
         email: 'zhangsan@example.com',
-        address: '山东省济南市历下区'
+        address: customerAddress
       },
       paymentInfo: {
         method: '银行转账',
