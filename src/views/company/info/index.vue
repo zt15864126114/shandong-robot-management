@@ -65,7 +65,82 @@
         :rules="rules"
         label-width="120px"
       >
-        <!-- 添加表单内容 -->
+        <el-form-item label="企业名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入企业名称" />
+        </el-form-item>
+        
+        <el-form-item label="法定代表人" prop="legalPerson">
+          <el-input v-model="form.legalPerson" placeholder="请输入法定代表人姓名" />
+        </el-form-item>
+        
+        <el-form-item label="统一社会信用代码" prop="creditCode">
+          <el-input v-model="form.creditCode" placeholder="请输入统一社会信用代码" />
+        </el-form-item>
+        
+        <el-form-item label="注册资本" prop="registeredCapital">
+          <el-input-number 
+            v-model="form.registeredCapital" 
+            :min="0" 
+            :precision="2" 
+            :step="100" 
+            style="width: 100%"
+            placeholder="请输入注册资本"
+          />
+        </el-form-item>
+        
+        <el-form-item label="企业类型" prop="companyType">
+          <el-select v-model="form.companyType" placeholder="请选择企业类型" style="width: 100%">
+            <el-option label="股份有限公司" value="股份有限公司" />
+            <el-option label="有限责任公司" value="有限责任公司" />
+            <el-option label="合伙企业" value="合伙企业" />
+            <el-option label="个人独资企业" value="个人独资企业" />
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item label="成立日期" prop="foundingDate">
+          <el-date-picker
+            v-model="form.foundingDate"
+            type="date"
+            placeholder="选择成立日期"
+            style="width: 100%"
+          />
+        </el-form-item>
+        
+        <el-form-item label="经营范围" prop="businessScope">
+          <el-input
+            v-model="form.businessScope"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入经营范围"
+          />
+        </el-form-item>
+        
+        <el-form-item label="注册地址" prop="address">
+          <el-input
+            v-model="form.address"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入注册地址"
+          />
+        </el-form-item>
+
+        <el-divider>联系方式</el-divider>
+        
+        <el-form-item label="联系电话" prop="phone">
+          <el-input v-model="form.phone" placeholder="请输入联系电话" />
+        </el-form-item>
+        
+        <el-form-item label="电子邮箱" prop="email">
+          <el-input v-model="form.email" placeholder="请输入电子邮箱" />
+        </el-form-item>
+        
+        <el-form-item label="传真" prop="fax">
+          <el-input v-model="form.fax" placeholder="请输入传真号码" />
+        </el-form-item>
+        
+        <el-form-item label="企业网站" prop="website">
+          <el-input v-model="form.website" placeholder="请输入企业网站" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -147,18 +222,74 @@ const getCertStatusText = (status: string) => {
   return map[status] || '未知';
 };
 
+// 企业基本信息
+const companyInfo = ref({
+  name: '山东纳智达机器人有限公司',
+  legalPerson: '徐伟举',
+  creditCode: '91370800MA94FCPE5E',
+  registeredCapital: 2000,
+  companyType: '股份有限公司',
+  foundingDate: '2021-07-08',
+  businessScope: '工业机器人、服务机器人、特种机器人的研发、生产、销售及技术服务；智能装备及零部件的设计、制造、销售；自动化系统集成及技术咨询；软件开发；进出口业务',
+  address: '山东省济宁市汶上县中都街道华儒小镇25号楼',
+  phone: '0531-88888888',
+  email: 'contact@shandong-robot.com',
+  fax: '0531-88888889',
+  website: 'www.shandong-robot.com'
+});
+
+// 表单数据
+const form = ref({ ...companyInfo.value });
+
+// 表单校验规则
+const rules = {
+  name: [{ required: true, message: '请输入企业名称', trigger: 'blur' }],
+  legalPerson: [{ required: true, message: '请输入法定代表人', trigger: 'blur' }],
+  creditCode: [
+    { required: true, message: '请输入统一社会信用代码', trigger: 'blur' },
+    { pattern: /^[0-9A-HJ-NPQRTUWXY]{2}\d{6}[0-9A-HJ-NPQRTUWXY]{10}$/, message: '请输入正确的统一社会信用代码', trigger: 'blur' }
+  ],
+  registeredCapital: [{ required: true, message: '请输入注册资本', trigger: 'blur' }],
+  companyType: [{ required: true, message: '请选择企业类型', trigger: 'change' }],
+  foundingDate: [{ required: true, message: '请选择成立日期', trigger: 'change' }],
+  businessScope: [{ required: true, message: '请输入经营范围', trigger: 'blur' }],
+  address: [{ required: true, message: '请输入注册地址', trigger: 'blur' }],
+  phone: [
+    { required: true, message: '请输入联系电话', trigger: 'blur' },
+    { pattern: /^(\d{3,4}-?)?\d{7,8}$/, message: '请输入正确的电话号码', trigger: 'blur' }
+  ],
+  email: [
+    { required: true, message: '请输入电子邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+  ],
+  website: [
+    { pattern: /^https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/, message: '请输入正确的网址', trigger: 'blur' }
+  ]
+};
+
 // 对话框控制
 const dialogVisible = ref(false);
+const formRef = ref();
 
 // 编辑企业信息
 const handleEdit = () => {
+  form.value = { ...companyInfo.value };
   dialogVisible.value = true;
 };
 
 // 提交表单
-const handleSubmit = () => {
-  ElMessage.success('保存成功');
-  dialogVisible.value = false;
+const handleSubmit = async () => {
+  if (!formRef.value) return;
+  
+  try {
+    await formRef.value.validate();
+    // 更新企业信息
+    Object.assign(companyInfo.value, form.value);
+    ElMessage.success('保存成功');
+    dialogVisible.value = false;
+  } catch (error) {
+    console.error('表单验证失败:', error);
+  }
 };
 </script>
 
